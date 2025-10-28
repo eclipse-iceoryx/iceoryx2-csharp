@@ -24,8 +24,6 @@ C# / .NET bindings for iceoryx2 - Zero-Copy Lock-Free IPC
 - ✅ Production-ready with proper memory management and error handling
 - ⚠️ Requires native library: `libiceoryx2_ffi_c.{so|dylib|dll}` (included in git submodule)
 
-📊 See [STATUS_REPORT.md](STATUS_REPORT.md) for detailed status.
-
 ## Overview
 
 This package provides C# and .NET bindings for iceoryx2, enabling zero-copy inter-process communication in .NET applications. The bindings use P/Invoke to call into the iceoryx2 C FFI layer and provide idiomatic C# APIs with full memory safety.
@@ -56,8 +54,6 @@ Or add to your `.csproj`:
 ```
 
 The NuGet package includes pre-built native libraries for macOS, Linux, and Windows.
-
-See [NUGET.md](NUGET.md) for detailed package information.
 
 ### Option 2: Build from Source
 
@@ -228,95 +224,28 @@ The C# bindings automatically detect and load the correct native library for you
 | **macOS**   | `libiceoryx2_ffi_c.dylib`, `iceoryx2_ffi_c.dylib` |
 | **Windows** | `iceoryx2_ffi_c.dll`, `libiceoryx2_ffi_c.dll` |
 
-## Package Structure
-
-```bash
-## Package Structure
-
-## Examples
-```
-
-**Request-Response Example:**
-
-```bash
-# Terminal 1 - Run server
-cd examples/RequestResponse
-dotnet run -- server
-
-# Terminal 2 - Run client
-cd examples/RequestResponse
-dotnet run -- client
-```
-
-**Complex Data Types Example:**
-
-```bash
-# Terminal 1 - Run publisher
-cd examples/ComplexDataTypes
-dotnet run -- publisher TransmissionData
-
-# Terminal 2 - Run subscriber
-cd examples/ComplexDataTypes
-dotnet run -- subscriber TransmissionData
-```
-
 ## Project Structure
 
 ```
-iceoryx2-ffi/csharp/
+iceoryx2-csharp/
+├── iceoryx2/                            # Git submodule - iceoryx2 Rust implementation
 ├── src/
-│   └── Iceoryx2/
-│       ├── Native/                      # C-bindings via P/Invoke
-│       │   └── Iox2NativeMethods.cs    # Complete FFI declarations
-│       ├── SafeHandles/                 # Memory-safe resource management
-│       │   ├── SafeNodeHandle.cs       # Node resource management
-│       │   ├── SafeServiceHandle.cs    # Service resource management
-│       │   ├── SafePublisherHandle.cs  # Publisher resource management
-│       │   ├── SafeSubscriberHandle.cs # Subscriber resource management
-│       │   ├── SafeEventServiceHandle.cs # Event service management
-│       │   ├── SafeNotifierHandle.cs   # Notifier resource management
-│       │   └── SafeListenerHandle.cs   # Listener resource management
-│       ├── Core/                        # High-level API wrappers
-│       │   ├── Node.cs                 # Node wrapper
-│       │   ├── NodeBuilder.cs          # Node builder pattern
-│       │   ├── ServiceBuilder.cs       # Service builder pattern
-│       │   └── ...                     # Other core classes
-│       ├── PublishSubscribe/            # Pub/Sub messaging pattern
-│       │   ├── Service.cs              # Service wrapper for pub/sub
-│       │   ├── Publisher.cs            # Publisher wrapper
-│       │   ├── Subscriber.cs           # Subscriber wrapper
-│       │   ├── Sample.cs               # Data sample wrapper
-│       │   └── ...                     # Related classes
-│       ├── Event/                       # Event-based communication
-│       │   ├── EventService.cs         # Event service wrapper
-│       │   ├── Notifier.cs             # Event notifier (sender)
-│       │   ├── Listener.cs             # Event listener (receiver)
-│       │   ├── EventId.cs              # Event identifier type
-│       │   └── EventServiceBuilder.cs  # Event service builder
-│       ├── RequestResponse/             # Request-Response (RPC) pattern
-│       │   ├── RequestResponseService.cs       # RPC service wrapper
-│       │   ├── RequestResponseServiceBuilder.cs # RPC service builder
-│       │   ├── Client.cs               # RPC client (request sender)
-│       │   ├── Server.cs               # RPC server (request receiver)
-│       │   ├── Request.cs              # Received request
-│       │   ├── RequestMut.cs           # Mutable request to send
-│       │   ├── Response.cs             # Received response
-│       │   ├── ResponseMut.cs          # Mutable response to send
-│       │   └── PendingResponse.cs      # Async response handle
-│       ├── Types/                       # Common types and utilities
-│       │   ├── Result.cs               # Result<T, E> monad
-│       │   ├── Iox2Error.cs            # Error enumeration
-│       │   └── ...                     # Other utility types
-│       └── Iceoryx2.csproj             # Project file
+│   ├── Iceoryx2/                        # Main C# library
+│   │   ├── Native/                      # C-bindings via P/Invoke
+│   │   ├── SafeHandles/                 # Memory-safe resource management
+│   │   ├── Core/                        # High-level API wrappers
+│   │   ├── PublishSubscribe/            # Pub/Sub messaging pattern
+│   │   ├── Event/                       # Event-based communication
+│   │   ├── RequestResponse/             # Request-Response (RPC) pattern
+│   │   └── Types/                       # Common types and utilities
+│   └── Iceoryx2.Reactive/              # Reactive Extensions support
 ├── examples/                            # C# examples
 │   ├── PublishSubscribe/               # Pub/Sub example
 │   ├── ComplexDataTypes/               # Complex struct example
 │   ├── Event/                          # Event API example
-│   └── RequestResponse/                # Request-Response RPC example
-├── tests/                               # Unit tests
-│   └── Iceoryx2Tests/
-│       ├── BasicTests.cs               # Core functionality tests
-│       └── ...                         # Additional test suites
+│   ├── RequestResponse/                # Request-Response RPC example
+│   └── AsyncPubSub/                    # Async/await patterns example
+├── tests/                              # Unit tests
 └── README.md
 ```
 

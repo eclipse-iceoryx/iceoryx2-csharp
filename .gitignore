@@ -40,3 +40,7 @@ packages/
 runtimes/
 
 .DS_Store
+
+
+# github action act artifact files
+.artifacts/
