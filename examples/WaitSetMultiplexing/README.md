@@ -14,13 +14,15 @@ The example consists of two programs:
 ## Key Concepts
 
 ### WaitSet with Async/Await
-- Event multiplexing mechanism that blocks until events arrive
-- No CPU polling - uses OS-level event notification
-- **Async/Await Integration**: WaitSet runs in background Task for non-blocking operation
-- Can monitor multiple listeners, deadlines, and periodic intervals
-- Supports graceful shutdown via signal handling (Ctrl+C) with CancellationToken
+
+* Event multiplexing mechanism that blocks until events arrive
+* No CPU polling - uses OS-level event notification
+* **Async/Await Integration**: WaitSet runs in background Task for non-blocking operation
+* Can monitor multiple listeners, deadlines, and periodic intervals
+* Supports graceful shutdown via signal handling (Ctrl+C) with CancellationToken
 
 ### Critical Pattern: Event Consumption
+
 The callback **must consume ALL pending events** to avoid busy loops:
 
 ```csharp
@@ -66,6 +68,7 @@ dotnet run --framework net8.0 -- wait service_a service_b
 ```
 
 Output:
+
 ```
 Waiting on services: 'service_a' and 'service_b'
 ```
@@ -77,6 +80,7 @@ dotnet run --framework net9.0 -- notify 123 service_a
 ```
 
 Output (in Terminal 1):
+
 ```
 [service: 'service_a'] event received with id: 123
 [service: 'service_a'] event received with id: 123
@@ -90,6 +94,7 @@ dotnet run --framework net9.0 -- notify 456 service_b
 ```
 
 Output (in Terminal 1):
+
 ```
 [service: 'service_b'] event received with id: 456
 [service: 'service_b'] event received with id: 456
@@ -99,8 +104,9 @@ Output (in Terminal 1):
 ## Signal Handling
 
 The waiter uses `SignalHandlingMode.TerminationAndInterrupt` to handle:
-- `SIGTERM` (Ctrl+C on Unix/Linux/macOS)
-- `SIGINT` (interrupt signal)
+
+* `SIGTERM` (Ctrl+C on Unix/Linux/macOS)
+* `SIGINT` (interrupt signal)
 
 Press Ctrl+C to gracefully shut down:
 
@@ -205,6 +211,7 @@ catch (OperationCanceledException)
 ### Other Attachment Types
 
 **Deadline**: Wake on events OR timeout
+
 ```csharp
 var guard = waitset.AttachDeadline(listener, TimeSpan.FromSeconds(5))
     .Expect("Failed to attach with deadline");
@@ -216,6 +223,7 @@ if (attachmentId.HasMissedDeadline(guard))
 ```
 
 **Interval**: Periodic wake-ups
+
 ```csharp
 var guard = waitset.AttachInterval(TimeSpan.FromSeconds(1))
     .Expect("Failed to attach interval");
@@ -224,9 +232,10 @@ var guard = waitset.AttachInterval(TimeSpan.FromSeconds(1))
 ## Cross-Platform Support
 
 The WaitSet automatically uses the best mechanism for each OS:
-- **Linux**: epoll
-- **macOS**: kqueue
-- **Windows**: Custom implementation
+
+* **Linux**: epoll
+* **macOS**: kqueue
+* **Windows**: Custom implementation
 
 No code changes needed - it just works!
 
@@ -242,11 +251,11 @@ using var guard = waitset.AttachNotification(listener).Expect("...");
 
 ## Performance
 
-- **Zero polling**: CPU usage is near zero when idle
-- **Low latency**: OS-level event notification wakes immediately
-- **Scalable**: Can monitor many event sources efficiently
-- **OS-optimized**: Uses native primitives for best performance
-- **Async/Await**: Non-blocking async operations allow efficient concurrent processing
+* **Zero polling**: CPU usage is near zero when idle
+* **Low latency**: OS-level event notification wakes immediately
+* **Scalable**: Can monitor many event sources efficiently
+* **OS-optimized**: Uses native primitives for best performance
+* **Async/Await**: Non-blocking async operations allow efficient concurrent processing
 
 ## Benefits of Async/Await Pattern
 

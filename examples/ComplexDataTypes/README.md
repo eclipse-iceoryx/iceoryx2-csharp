@@ -46,10 +46,11 @@ Without this attribute, the C# type name (e.g., "TransmissionData") is used by d
 ### Unmanaged Constraint
 
 All types used with iceoryx2 must be `unmanaged`, meaning they:
-- Cannot contain reference types (classes, strings, etc.)
-- Cannot contain managed pointers
-- Can only contain other unmanaged types
-- Can be safely copied byte-by-byte
+
+* Cannot contain reference types (classes, strings, etc.)
+* Cannot contain managed pointers
+* Can only contain other unmanaged types
+* Can be safely copied byte-by-byte
 
 ```csharp
 // ✓ Valid unmanaged types
@@ -86,6 +87,7 @@ dotnet run -- publisher transmission
 ```
 
 Or with other data types:
+
 ```bash
 dotnet run -- publisher sensor
 dotnet run -- publisher point
@@ -99,6 +101,7 @@ dotnet run -- subscriber transmission
 ```
 
 Or matching the publisher's data type:
+
 ```bash
 dotnet run -- subscriber sensor
 dotnet run -- subscriber point
@@ -107,6 +110,7 @@ dotnet run -- subscriber point
 ## Example Output
 
 ### Publisher
+
 ```
 [Publisher] Starting with type: TransmissionData
 [Publisher] Type size: 16 bytes
@@ -119,6 +123,7 @@ Sending: TransmissionData { x: 2, y: 6, funky: 1624.24 }
 ```
 
 ### Subscriber
+
 ```
 [Subscriber] Starting with type: TransmissionData
 [Subscriber] Type size: 16 bytes
@@ -139,9 +144,10 @@ To communicate with Rust or C applications, ensure:
 3. **Size and alignment match**: Verify with `sizeof()` in both languages
 4. **Service names match**: Use the same service name string
 
-### Example: Rust ↔ C#
+### Example: Rust ↔ C #
 
 **Rust (rust_publisher.rs):**
+
 ```rust
 #[repr(C)]
 struct TransmissionData {
@@ -152,6 +158,7 @@ struct TransmissionData {
 ```
 
 **C# (csharp_subscriber.cs):**
+
 ```csharp
 [StructLayout(LayoutKind.Sequential)]
 [Iox2Type("TransmissionData")]
@@ -178,20 +185,26 @@ Both use service name: `"ComplexTypes/Transmission"`
 ## Troubleshooting
 
 ### Type Size Mismatch
+
 If you get errors about type size mismatches:
-- Verify struct size in both languages using `sizeof()`
-- Check for padding differences (use `#pragma pack` in C or `Pack` in C#)
-- Ensure field types match (e.g., `int32_t` in C = `int` in C#)
+
+* Verify struct size in both languages using `sizeof()`
+* Check for padding differences (use `#pragma pack` in C or `Pack` in C#)
+* Ensure field types match (e.g., `int32_t` in C = `int` in C#)
 
 ### Type Name Not Found
+
 If the subscriber can't find the service:
-- Ensure `[Iox2Type]` names match exactly
-- Verify service names match (case-sensitive)
-- Check that publisher started before subscriber
+
+* Ensure `[Iox2Type]` names match exactly
+* Verify service names match (case-sensitive)
+* Check that publisher started before subscriber
 
 ### Memory Corruption
+
 If you get crashes or corrupted data:
-- Ensure `[StructLayout(LayoutKind.Sequential)]` is present
-- Verify alignment requirements match
-- Check for C# auto-properties (use fields instead)
-- Ensure no managed types sneaked into the struct
+
+* Ensure `[StructLayout(LayoutKind.Sequential)]` is present
+* Verify alignment requirements match
+* Check for C# auto-properties (use fields instead)
+* Ensure no managed types sneaked into the struct

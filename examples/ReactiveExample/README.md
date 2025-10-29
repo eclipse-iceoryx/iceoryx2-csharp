@@ -1,6 +1,6 @@
 # Reactive Extensions Example
 
-This example demonstrates how to use the **Iceoryx2.Reactive** library to convert iceoryx2 subscribers into reactive, declarative data streams using `IObservable<T>` and `IAsyncEnumerable<T>`.
+This example demonstrates how to use the **iceoryx2.Reactive** library to convert iceoryx2 subscribers into reactive, declarative data streams using `IObservable<T>` and `IAsyncEnumerable<T>`.
 
 ## Overview
 
@@ -22,7 +22,7 @@ This example demonstrates 7 different reactive patterns:
 
 ### Prerequisites
 
-1. **Iceoryx2 Native Library**: The example requires the iceoryx2 native library (C/C++).
+1. **iceoryx2 Native Library**: The example requires the iceoryx2 native library (C/C++).
 2. **.NET 8.0 or .NET 9.0**: The example targets both frameworks.
 
 ### Build
@@ -34,11 +34,13 @@ dotnet build
 ### Run with Framework Selection
 
 For .NET 8.0:
+
 ```bash
 dotnet run --framework net8.0
 ```
 
 For .NET 9.0:
+
 ```bash
 dotnet run --framework net9.0
 ```
@@ -67,12 +69,14 @@ publisher.SendCopy(data).Expect("Failed to send sample");
 ### Subscriber Patterns
 
 #### 1. Basic Observable
+
 ```csharp
 subscriber.AsObservable<SensorData>()
     .Subscribe(data => Console.WriteLine($"[Basic] {data}"));
 ```
 
 #### 2. Filtering
+
 ```csharp
 subscriber.AsObservable<SensorData>()
     .Where(data => data.Temperature > 28.0)
@@ -80,6 +84,7 @@ subscriber.AsObservable<SensorData>()
 ```
 
 #### 3. Transformation
+
 ```csharp
 subscriber.AsObservable<SensorData>()
     .Select(data => $"Temp: {data.Temperature:F1}°C, Humidity: {data.Humidity:F1}%")
@@ -87,6 +92,7 @@ subscriber.AsObservable<SensorData>()
 ```
 
 #### 4. Buffering (2-second windows)
+
 ```csharp
 subscriber.AsObservable<SensorData>()
     .Buffer(TimeSpan.FromSeconds(2))
@@ -97,6 +103,7 @@ subscriber.AsObservable<SensorData>()
 ```
 
 #### 5. Throttling (1-second sample)
+
 ```csharp
 subscriber.AsObservable<SensorData>()
     .Sample(TimeSpan.FromSeconds(1))
@@ -104,6 +111,7 @@ subscriber.AsObservable<SensorData>()
 ```
 
 #### 6. Distinct Until Changed
+
 ```csharp
 subscriber.AsObservable<SensorData>()
     .Select(data => (int)data.Temperature)
@@ -112,6 +120,7 @@ subscriber.AsObservable<SensorData>()
 ```
 
 #### 7. Async Enumerable
+
 ```csharp
 await foreach (var data in subscriber.AsAsyncEnumerable<SensorData>())
 {
@@ -132,8 +141,8 @@ IObservable<T> AsObservable<T>(
     CancellationToken cancellationToken = default)
 ```
 
-- **pollingInterval**: How often to poll for data (default: 10ms)
-- **cancellationToken**: Token to cancel the subscription
+* **pollingInterval**: How often to poll for data (default: 10ms)
+* **cancellationToken**: Token to cancel the subscription
 
 ### AsAsyncEnumerable<T>()
 
@@ -147,9 +156,9 @@ IAsyncEnumerable<T> AsAsyncEnumerable<T>(
 
 ## Performance Considerations
 
-- **Polling Interval**: Lower intervals (e.g., 1ms) reduce latency but increase CPU usage. Higher intervals (e.g., 100ms) reduce CPU usage but increase latency.
-- **Default**: 10ms is a reasonable default for most use cases.
-- **Resource Cleanup**: Always dispose subscriptions when done to stop polling tasks.
+* **Polling Interval**: Lower intervals (e.g., 1ms) reduce latency but increase CPU usage. Higher intervals (e.g., 100ms) reduce CPU usage but increase latency.
+* **Default**: 10ms is a reasonable default for most use cases.
+* **Resource Cleanup**: Always dispose subscriptions when done to stop polling tasks.
 
 ## Disposing Subscriptions
 
@@ -165,13 +174,13 @@ using var subscription = subscriber.AsObservable<SensorData>()
 
 ## Next Steps
 
-- Try modifying the filters and transformations
-- Experiment with different Rx operators (`Throttle`, `Debounce`, `Merge`, etc.)
-- Adjust the polling interval to see latency vs. CPU trade-offs
-- Use `CancellationTokenSource` for graceful shutdown
+* Try modifying the filters and transformations
+* Experiment with different Rx operators (`Throttle`, `Debounce`, `Merge`, etc.)
+* Adjust the polling interval to see latency vs. CPU trade-offs
+* Use `CancellationTokenSource` for graceful shutdown
 
 ## References
 
-- [Iceoryx2.Reactive README](../../src/Iceoryx2.Reactive/README.md)
-- [Rx.NET Documentation](https://github.com/dotnet/reactive)
-- [IAsyncEnumerable<T> Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/async-streams)
+* [iceoryx2.Reactive README](../../src/Iceoryx2.Reactive/README.md)
+* [Rx.NET Documentation](https://github.com/dotnet/reactive)
+* [IAsyncEnumerable<T> Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/asynchronous-programming/async-streams)

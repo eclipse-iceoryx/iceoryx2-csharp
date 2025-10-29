@@ -4,12 +4,12 @@ This example demonstrates the async/await functionality in the iceoryx2 C# bindi
 
 ## Features Demonstrated
 
-- ✅ Async publisher using `await Task.Delay()` instead of `Thread.Sleep()`
-- ✅ Async subscriber with timeout using `ReceiveAsync(TimeSpan, CancellationToken)`
-- ✅ Async subscriber polling indefinitely using `ReceiveAsync(CancellationToken)`
-- ✅ Multiple concurrent subscribers processing data in parallel
-- ✅ Proper cancellation support with `CancellationToken`
-- ✅ Graceful shutdown with Ctrl+C handling
+* ✅ Async publisher using `await Task.Delay()` instead of `Thread.Sleep()`
+* ✅ Async subscriber with timeout using `ReceiveAsync(TimeSpan, CancellationToken)`
+* ✅ Async subscriber polling indefinitely using `ReceiveAsync(CancellationToken)`
+* ✅ Multiple concurrent subscribers processing data in parallel
+* ✅ Proper cancellation support with `CancellationToken`
+* ✅ Graceful shutdown with Ctrl+C handling
 
 **Note:** Subscribers use polling (every 10ms) since the native API doesn't provide blocking receive. However, the async implementation yields to the thread pool efficiently, making it suitable for async scenarios without blocking threads.
 
@@ -30,6 +30,7 @@ dotnet run publisher
 ```
 
 Output:
+
 ```
 iceoryx2 C# Async Publish-Subscribe Example
 ============================================
@@ -57,6 +58,7 @@ dotnet run subscriber
 ```
 
 Output:
+
 ```
 Starting Async Subscriber (with 5s timeout)...
 
@@ -82,6 +84,7 @@ dotnet run blocking
 ```
 
 Output:
+
 ```
 Starting Async Subscriber (polling until data)...
 
@@ -107,6 +110,7 @@ dotnet run multi
 ```
 
 Output:
+
 ```
 Starting 3 Concurrent Async Subscribers...
 
@@ -128,6 +132,7 @@ Press Ctrl+C to stop
 ### Publisher
 
 **Synchronous:**
+
 ```csharp
 while (true)
 {
@@ -137,6 +142,7 @@ while (true)
 ```
 
 **Asynchronous:**
+
 ```csharp
 while (!cancellationToken.IsCancellationRequested)
 {
@@ -148,6 +154,7 @@ while (!cancellationToken.IsCancellationRequested)
 ### Subscriber
 
 **Synchronous:**
+
 ```csharp
 while (true)
 {
@@ -158,6 +165,7 @@ while (true)
 ```
 
 **Asynchronous with timeout:**
+
 ```csharp
 while (!cancellationToken.IsCancellationRequested)
 {
@@ -170,6 +178,7 @@ while (!cancellationToken.IsCancellationRequested)
 ```
 
 **Asynchronous blocking:**
+
 ```csharp
 while (!cancellationToken.IsCancellationRequested)
 {
@@ -183,36 +192,38 @@ while (!cancellationToken.IsCancellationRequested)
 ## Benefits of Async Version
 
 1. **Better Thread Pool Utilization**
-   - No blocking of threads during waits
-   - Thread pool can reuse threads for other work
+   * No blocking of threads during waits
+   * Thread pool can reuse threads for other work
 
 2. **Proper Cancellation**
-   - All operations support `CancellationToken`
-   - Clean shutdown with Ctrl+C
+   * All operations support `CancellationToken`
+   * Clean shutdown with Ctrl+C
 
 3. **Composability**
-   - Can use `Task.WhenAll()` for concurrent operations
-   - Natural integration with other async code
+   * Can use `Task.WhenAll()` for concurrent operations
+   * Natural integration with other async code
 
 4. **Scalability**
-   - Multiple subscribers can run efficiently in parallel
-   - No thread-per-subscriber overhead
+   * Multiple subscribers can run efficiently in parallel
+   * No thread-per-subscriber overhead
 
 ## Technical Details
 
 ### Polling Interval
 
 The async subscriber methods poll every 10ms when waiting for data:
-- **CPU Impact**: Very low (Task.Delay yields to thread pool)
-- **Latency**: ~5ms average, ~10ms maximum
-- **Acceptable for**: Most IPC scenarios
+
+* **CPU Impact**: Very low (Task.Delay yields to thread pool)
+* **Latency**: ~5ms average, ~10ms maximum
+* **Acceptable for**: Most IPC scenarios
 
 ### Cancellation
 
 All async methods check the cancellation token:
-- On each polling iteration
-- Before long-running operations
-- Throws `OperationCanceledException` when cancelled
+
+* On each polling iteration
+* Before long-running operations
+* Throws `OperationCanceledException` when cancelled
 
 ### Thread Safety
 
@@ -220,6 +231,6 @@ All iceoryx2 objects are designed to be used from a single thread. If you need t
 
 ## See Also
 
-- [ProgramAsync.cs](../PublishSubscribe/ProgramAsync.cs) - Async helper methods (not standalone)
-- [../RequestResponse/ProgramAsync.cs](../RequestResponse/ProgramAsync.cs) - Async request-response example
-- [../../ASYNC_SUPPORT.md](../../ASYNC_SUPPORT.md) - Detailed async/await documentation
+* [ProgramAsync.cs](../PublishSubscribe/ProgramAsync.cs) - Async helper methods (not standalone)
+* [../RequestResponse/ProgramAsync.cs](../RequestResponse/ProgramAsync.cs) - Async request-response example
+* [../../ASYNC_SUPPORT.md](../../ASYNC_SUPPORT.md) - Detailed async/await documentation

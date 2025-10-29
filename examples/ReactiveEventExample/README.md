@@ -1,6 +1,6 @@
 # Reactive Event Example
 
-This example demonstrates **event-driven Observable** usage with Iceoryx2's Listener and Notifier using the `Iceoryx2.Reactive` library.
+This example demonstrates **event-driven Observable** usage with iceoryx2's Listener and Notifier using the `Iceoryx2.Reactive` library.
 
 ## Key Concepts
 
@@ -8,16 +8,16 @@ This example demonstrates **event-driven Observable** usage with Iceoryx2's List
 
 This example showcases **truly event-driven** reactive programming:
 
-- **Event-based (Listener/Notifier)** = Truly asynchronous with WaitSet (epoll/kqueue)
-  - No polling loops
-  - Efficient CPU usage
-  - Immediate event notification
-  - Used in this example
+* **Event-based (Listener/Notifier)** = Truly asynchronous with WaitSet (epoll/kqueue)
+    * No polling loops
+    * Efficient CPU usage
+    * Immediate event notification
+    * Used in this example
 
-- **Pub/Sub (Subscriber/Publisher)** = Polling-based architecture (see `ReactiveExample`)
-  - Uses periodic polling
-  - Higher latency
-  - More CPU overhead
+* **Pub/Sub (Subscriber/Publisher)** = Polling-based architecture (see `ReactiveExample`)
+    * Uses periodic polling
+    * Higher latency
+    * More CPU overhead
 
 ### Architecture
 
@@ -62,11 +62,12 @@ dotnet run --framework net9.0 -- notifier events
 ```
 
 The notifier will send various event types:
-- System events (startup, shutdown)
-- Alerts (warning, error, critical)
-- Health monitoring (heartbeat)
-- Data events (data ready)
-- User actions
+
+* System events (startup, shutdown)
+* Alerts (warning, error, critical)
+* Health monitoring (heartbeat)
+* Data events (data ready)
+* User actions
 
 ## Event Types
 
@@ -87,20 +88,23 @@ The example uses these event IDs:
 ## Demonstrated Rx Operators
 
 ### Basic Operators
-- `Subscribe()` - Basic event consumption
-- `Where()` - Filter events by condition
-- `Select()` - Transform events to different types
+
+* `Subscribe()` - Basic event consumption
+* `Where()` - Filter events by condition
+* `Select()` - Transform events to different types
 
 ### Time-Based Operators
-- `Buffer()` - Collect events in time windows
-- `Sample()` - Take latest event at intervals
-- `Throttle()` - Suppress rapid events
+
+* `Buffer()` - Collect events in time windows
+* `Sample()` - Take latest event at intervals
+* `Throttle()` - Suppress rapid events
 
 ### Advanced Patterns
-- `GroupBy()` - Group events by property
-- Custom event pattern detection
-- Deadline monitoring with timeout
-- `AsAsyncEnumerable()` - Convert to async enumerable
+
+* `GroupBy()` - Group events by property
+* Custom event pattern detection
+* Deadline monitoring with timeout
+* `AsAsyncEnumerable()` - Convert to async enumerable
 
 ## Performance Notes
 
@@ -109,27 +113,31 @@ The example uses these event IDs:
 The `ListenerExtensions.AsObservable()` method uses WaitSet internally, which means:
 
 ✅ **Efficient**:
-- No polling loops (unlike `SubscriberExtensions`)
-- Events trigger immediately via kernel notification (epoll/kqueue)
-- Minimal CPU usage when idle
-- Multiple listeners can be multiplexed efficiently
+
+* No polling loops (unlike `SubscriberExtensions`)
+* Events trigger immediately via kernel notification (epoll/kqueue)
+* Minimal CPU usage when idle
+* Multiple listeners can be multiplexed efficiently
 
 ⚠️ **Important**:
-- The internal implementation consumes **all pending events** in a loop to avoid busy-waiting
-- This is correct behavior for event streams where you want to process all queued events
+
+* The internal implementation consumes **all pending events** in a loop to avoid busy-waiting
+* This is correct behavior for event streams where you want to process all queued events
 
 ### When to Use Events vs Pub/Sub
 
 **Use Events (Listener/Notifier)** when:
-- You need lightweight notifications (just IDs)
-- Event-driven architecture is essential
-- Minimal latency is important
-- You're building control/coordination systems
+
+* You need lightweight notifications (just IDs)
+* Event-driven architecture is essential
+* Minimal latency is important
+* You're building control/coordination systems
 
 **Use Pub/Sub (Subscriber/Publisher)** when:
-- You need to transfer data payloads
-- Data volume is more important than latency
-- You're building data streaming systems
+
+* You need to transfer data payloads
+* Data volume is more important than latency
+* You're building data streaming systems
 
 ## Code Highlights
 
@@ -195,7 +203,7 @@ await foreach (var eventId in listener.AsAsyncEnumerable(cancellationToken: cts.
 
 ## See Also
 
-- **Event Example** (`examples/Event`) - Basic Listener/Notifier without Rx
-- **ReactiveExample** (`examples/ReactiveExample`) - Polling-based pub/sub with Rx
-- **ObservableWaitSet** (`examples/ObservableWaitSet`) - Low-level WaitSet usage
-- **WaitSetMultiplexing** (`examples/WaitSetMultiplexing`) - WaitSet multiplexing patterns
+* **Event Example** (`examples/Event`) - Basic Listener/Notifier without Rx
+* **ReactiveExample** (`examples/ReactiveExample`) - Polling-based pub/sub with Rx
+* **ObservableWaitSet** (`examples/ObservableWaitSet`) - Low-level WaitSet usage
+* **WaitSetMultiplexing** (`examples/WaitSetMultiplexing`) - WaitSet multiplexing patterns

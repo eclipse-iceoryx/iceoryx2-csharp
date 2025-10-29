@@ -1,4 +1,4 @@
-# Rich Error Handling in Iceoryx2 C# Bindings
+# Rich Error Handling in iceoryx2 C# Bindings
 
 The iceoryx2 C# bindings provide rich, contextual error information through a class hierarchy that enables better diagnostics and troubleshooting.
 
@@ -151,43 +151,50 @@ if (result.IsErr())
 ## All Error Types
 
 ### Node Errors
-- `NodeCreationError` - Node creation failed
+
+* `NodeCreationError` - Node creation failed
 
 ### Service Errors
-- `ServiceCreationError` - Publish/subscribe service creation failed
-- `EventServiceCreationError` - Event service creation failed
-- `RequestResponseServiceCreationError` - Request/response service creation failed
+
+* `ServiceCreationError` - Publish/subscribe service creation failed
+* `EventServiceCreationError` - Event service creation failed
+* `RequestResponseServiceCreationError` - Request/response service creation failed
 
 ### Publisher/Subscriber Errors
-- `PublisherCreationError` - Publisher creation failed
-- `SubscriberCreationError` - Subscriber creation failed
-- `SampleLoanError` - Failed to loan a sample
-- `SendError` - Failed to send data
-- `ReceiveError` - Failed to receive data
+
+* `PublisherCreationError` - Publisher creation failed
+* `SubscriberCreationError` - Subscriber creation failed
+* `SampleLoanError` - Failed to loan a sample
+* `SendError` - Failed to send data
+* `ReceiveError` - Failed to receive data
 
 ### Event Errors
-- `NotifierCreationError` - Notifier creation failed
-- `ListenerCreationError` - Listener creation failed
-- `NotifyError` - Failed to notify event
-- `WaitError` - Failed to wait for event
+
+* `NotifierCreationError` - Notifier creation failed
+* `ListenerCreationError` - Listener creation failed
+* `NotifyError` - Failed to notify event
+* `WaitError` - Failed to wait for event
 
 ### Request/Response Errors
-- `ClientCreationError` - Client creation failed
-- `ServerCreationError` - Server creation failed
-- `RequestLoanError` - Failed to loan a request
-- `RequestSendError` - Failed to send request
-- `ResponseLoanError` - Failed to loan a response
-- `ResponseSendError` - Failed to send response
-- `ResponseReceiveError` - Failed to receive response
+
+* `ClientCreationError` - Client creation failed
+* `ServerCreationError` - Server creation failed
+* `RequestLoanError` - Failed to loan a request
+* `RequestSendError` - Failed to send request
+* `ResponseLoanError` - Failed to loan a response
+* `ResponseSendError` - Failed to send response
+* `ResponseReceiveError` - Failed to receive response
 
 ### WaitSet Errors
-- `WaitSetCreationError` - WaitSet creation failed
-- `WaitSetAttachmentError` - Failed to attach to WaitSet
-- `WaitSetRunError` - WaitSet run operation failed
+
+* `WaitSetCreationError` - WaitSet creation failed
+* `WaitSetAttachmentError` - Failed to attach to WaitSet
+* `WaitSetRunError` - WaitSet run operation failed
 
 ### General Errors
-- `InvalidHandleError` - Invalid handle usage
-- `UnknownError` - Unknown or unclassified error
+
+* `InvalidHandleError` - Invalid handle usage
+* `UnknownError` - Unknown or unclassified error
 
 ## Benefits
 

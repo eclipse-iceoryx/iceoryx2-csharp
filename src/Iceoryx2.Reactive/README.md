@@ -1,4 +1,4 @@
-# Iceoryx2.Reactive
+# iceoryx2.Reactive
 
 Reactive Extensions (Rx) support for iceoryx2 - provides `IObservable<T>` pattern for declarative, composable pub/sub communication.
 
@@ -38,19 +38,19 @@ Console.ReadKey(); // Keep the app alive
 
 ## Features
 
-- ✅ **IObservable<T>** - Full Rx integration with System.Reactive
-- ✅ **LINQ Operators** - Use Where, Select, Buffer, Throttle, etc.
-- ✅ **Async Streams** - IAsyncEnumerable<T> support for `await foreach`
-- ✅ **Composable** - Chain and combine multiple streams
-- ✅ **Cancellation** - Full CancellationToken support across all async operations
-- ✅ **Resource Management** - RAII disposal patterns
-- ✅ **Two Modes**: 
-  - **Polling-based** - Simple, works everywhere, configurable polling interval
-  - **Event-driven (WaitSet)** - Truly async using OS primitives (epoll/kqueue), low latency, low CPU
-- ✅ **Comprehensive Async API** - Every blocking operation has an async counterpart:
-  - `Subscriber.ReceiveAsync<T>()` - Async receive with optional timeout
-  - `Listener.WaitAsync()` - Async event waiting with optional timeout
-  - `PendingResponse.ReceiveAsync()` - Async response receiving with optional timeout
+* ✅ **IObservable<T>** - Full Rx integration with System.Reactive
+* ✅ **LINQ Operators** - Use Where, Select, Buffer, Throttle, etc.
+* ✅ **Async Streams** - IAsyncEnumerable<T> support for `await foreach`
+* ✅ **Composable** - Chain and combine multiple streams
+* ✅ **Cancellation** - Full CancellationToken support across all async operations
+* ✅ **Resource Management** - RAII disposal patterns
+* ✅ **Two Modes**:
+    * **Polling-based** - Simple, works everywhere, configurable polling interval
+    * **Event-driven (WaitSet)** - Truly async using OS primitives (epoll/kqueue), low latency, low CPU
+* ✅ **Comprehensive Async API** - Every blocking operation has an async counterpart:
+    * `Subscriber.ReceiveAsync<T>()` - Async receive with optional timeout
+    * `Listener.WaitAsync()` - Async event waiting with optional timeout
+    * `PendingResponse.ReceiveAsync()` - Async response receiving with optional timeout
 
 ## Two Approaches: Polling vs. Event-Driven
 
@@ -67,11 +67,12 @@ using var subscription = subscriber.AsObservable<SensorData>(
 ```
 
 **Characteristics:**
-- ⚠️ Polls with configurable interval (default: 10ms)
-- ⚠️ Minimum latency = polling interval
-- ⚠️ Periodic CPU wake-ups
-- ✅ Simple to use
-- ✅ Good for data stream processing
+
+* ⚠️ Polls with configurable interval (default: 10ms)
+* ⚠️ Minimum latency = polling interval
+* ⚠️ Periodic CPU wake-ups
+* ✅ Simple to use
+* ✅ Good for data stream processing
 
 ### 2. Listener - Event-Driven with WaitSet (Event Notifications)
 
@@ -85,25 +86,28 @@ using var subscription = listener.AsObservable(
 ```
 
 **Characteristics:**
-- ✅ **Zero polling** - OS wakes thread only on events (epoll/kqueue)
-- ✅ **Low latency** - immediate wake-up when events arrive
-- ✅ **Low CPU** - thread sleeps until events
-- ✅ **Deadline support** - optional timeout for event arrival
-- ✅ **Production-ready** for event-driven architectures
+
+* ✅ **Zero polling** - OS wakes thread only on events (epoll/kqueue)
+* ✅ **Low latency** - immediate wake-up when events arrive
+* ✅ **Low CPU** - thread sleeps until events
+* ✅ **Deadline support** - optional timeout for event arrival
+* ✅ **Production-ready** for event-driven architectures
 
 ### Architecture: Pub/Sub vs. Event System
 
 **Publish-Subscribe (Subscriber):**
-- Used for high-throughput data streams
-- Transfers actual payload data (zero-copy)
-- Native API is polling-based → Reactive Extensions use polling
-- Use for: sensor data, telemetry, video frames, large datasets
+
+* Used for high-throughput data streams
+* Transfers actual payload data (zero-copy)
+* Native API is polling-based → Reactive Extensions use polling
+* Use for: sensor data, telemetry, video frames, large datasets
 
 **Event System (Listener/Notifier):**
-- Used for lightweight event notifications
-- Transfers only event IDs (no payload)
-- Native API supports WaitSet → Reactive Extensions are truly event-driven
-- Use for: state changes, triggers, control signals, coordination
+
+* Used for lightweight event notifications
+* Transfers only event IDs (no payload)
+* Native API supports WaitSet → Reactive Extensions are truly event-driven
+* Use for: state changes, triggers, control signals, coordination
 
 ## Modern Async/Await Integration
 
@@ -112,6 +116,7 @@ The iceoryx2 C# wrapper is designed to be truly async-first. **Every potentially
 ### Core Async APIs
 
 #### Subscriber - Async Receive
+
 ```csharp
 // Wait indefinitely for a sample
 var result = await subscriber.ReceiveAsync<MyData>(cancellationToken);
@@ -121,6 +126,7 @@ var result = await subscriber.ReceiveAsync<MyData>(TimeSpan.FromSeconds(5), canc
 ```
 
 #### Listener - Async Event Waiting
+
 ```csharp
 // Wait indefinitely for an event
 var result = await listener.WaitAsync(cancellationToken);
@@ -130,6 +136,7 @@ var result = await listener.WaitAsync(TimeSpan.FromSeconds(5), cancellationToken
 ```
 
 #### PendingResponse - Async Request/Response
+
 ```csharp
 // Wait indefinitely for a response
 var result = await pendingResponse.ReceiveAsync(cancellationToken);
@@ -330,8 +337,9 @@ cts.Cancel(); // Stops the observable stream gracefully
 Converts a Subscriber into an `IObservable<T>` stream.
 
 **Parameters:**
-- `pollingInterval` (optional) - Polling interval (default: 10ms)
-- `cancellationToken` (optional) - Token to cancel the stream
+
+* `pollingInterval` (optional) - Polling interval (default: 10ms)
+* `cancellationToken` (optional) - Token to cancel the stream
 
 **Returns:** `IObservable<T>`
 
@@ -340,8 +348,9 @@ Converts a Subscriber into an `IObservable<T>` stream.
 Converts a Subscriber into an `IAsyncEnumerable<T>` stream.
 
 **Parameters:**
-- `pollingInterval` (optional) - Polling interval (default: 10ms)
-- `cancellationToken` (optional) - Token to cancel the stream
+
+* `pollingInterval` (optional) - Polling interval (default: 10ms)
+* `cancellationToken` (optional) - Token to cancel the stream
 
 **Returns:** `IAsyncEnumerable<T>`
 
@@ -354,45 +363,49 @@ Converts a Subscriber into an `IAsyncEnumerable<T>` stream.
 **For truly event-driven, low-latency operations**, use the **WaitSet** API instead, which blocks on platform-specific OS primitives (epoll on Linux, kqueue on macOS) and wakes only when events occur - no polling overhead.
 
 **When to use Reactive Extensions:**
-- ✅ Declarative data processing pipelines
-- ✅ LINQ-style transformations and filtering
-- ✅ Simple scripts and prototypes
-- ⚠️ Not ideal for ultra-low-latency production systems
+
+* ✅ Declarative data processing pipelines
+* ✅ LINQ-style transformations and filtering
+* ✅ Simple scripts and prototypes
+* ⚠️ Not ideal for ultra-low-latency production systems
 
 **When to use WaitSet:**
-- ✅ Production event-driven applications
-- ✅ Multiple event sources with single wait
-- ✅ Ultra-low latency requirements
-- ✅ Minimal CPU usage
+
+* ✅ Production event-driven applications
+* ✅ Multiple event sources with single wait
+* ✅ Ultra-low latency requirements
+* ✅ Minimal CPU usage
 
 ### Polling Interval Trade-offs
 
-- **Lower interval (1-5ms)**
-  - ✅ Lower latency
-  - ❌ Higher CPU usage
-  - Use for: Real-time systems, high-frequency data
+* **Lower interval (1-5ms)**
+    * ✅ Lower latency
+    * ❌ Higher CPU usage
+    * Use for: Real-time systems, high-frequency data
 
-- **Default interval (10ms)**
-  - ✅ Balanced latency/CPU
-  - Use for: Most applications
+* **Default interval (10ms)**
+    * ✅ Balanced latency/CPU
+    * Use for: Most applications
 
-- **Higher interval (50-100ms)**
-  - ✅ Lower CPU usage
-  - ❌ Higher latency
-  - Use for: Background processing, non-critical data
+* **Higher interval (50-100ms)**
+    * ✅ Lower CPU usage
+    * ❌ Higher latency
+    * Use for: Background processing, non-critical data
 
 ### CPU Usage
 
 The observable continuously polls the subscriber. Consider:
-- Adjusting `pollingInterval` based on your latency requirements
-- Using operators like `Throttle()` or `Sample()` to reduce downstream processing
-- Disposing subscriptions when not needed
+
+* Adjusting `pollingInterval` based on your latency requirements
+* Using operators like `Throttle()` or `Sample()` to reduce downstream processing
+* Disposing subscriptions when not needed
 
 ## Examples
 
 See the [examples directory](../../examples/) for complete working examples:
-- `ObservableWaitSet` - Observable pattern with event multiplexing
-- `WaitSetMultiplexing` - Async/await event handling
+
+* `ObservableWaitSet` - Observable pattern with event multiplexing
+* `WaitSetMultiplexing` - Async/await event handling
 
 ## Building
 

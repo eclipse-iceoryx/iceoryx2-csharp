@@ -40,9 +40,10 @@ publisher.SendWith<MyData>((ref MyData payload) => {
 ```
 
 **Benefits:**
-- Direct reference to the payload (no copying)
-- Useful for structs with many fields
-- Clear initialization logic
+
+* Direct reference to the payload (no copying)
+* Useful for structs with many fields
+* Clear initialization logic
 
 ### `SendLazy(Func<T>)` - Lazy Value Creation
 
@@ -58,9 +59,10 @@ publisher.SendLazy(() => new MyData {
 ```
 
 **Benefits:**
-- Value is only created if loan succeeds
-- Avoids wasted computation if memory is exhausted
-- Clean functional style
+
+* Value is only created if loan succeeds
+* Avoids wasted computation if memory is exhausted
+* Clean functional style
 
 ### `SendCopy(T value)` - Existing Copy-Based Send
 
@@ -95,6 +97,7 @@ if (result.IsOk)
 ```
 
 **Instead of:**
+
 ```csharp
 var sampleResult = subscriber.Receive<MyData>();
 if (sampleResult.IsOk)
@@ -129,9 +132,10 @@ else
 ```
 
 **Benefits:**
-- Automatic Sample disposal
-- Clean callback-based processing
-- Returns bool indicating if sample was available
+
+* Automatic Sample disposal
+* Clean callback-based processing
+* Returns bool indicating if sample was available
 
 ### `ProcessSampleAsync<T>(Action<T>, TimeSpan)` - Async Processing
 
@@ -219,27 +223,29 @@ if (sampleResult.IsOk)
 
 ## When to Use Each Pattern
 
-### Use Convenience Methods When:
-- ✅ Simple, straightforward use cases
-- ✅ Prototyping and initial development
-- ✅ Code clarity is more important than micro-optimization
-- ✅ You don't need fine-grained control
+### Use Convenience Methods When
 
-### Use Explicit API When:
-- 🔧 You need precise control over resource lifetimes
-- 🔧 Performance-critical paths (avoiding extra allocations)
-- 🔧 Complex data structures requiring incremental writes
-- 🔧 You want to keep samples alive longer than the operation
+* ✅ Simple, straightforward use cases
+* ✅ Prototyping and initial development
+* ✅ Code clarity is more important than micro-optimization
+* ✅ You don't need fine-grained control
+
+### Use Explicit API When
+
+* 🔧 You need precise control over resource lifetimes
+* 🔧 Performance-critical paths (avoiding extra allocations)
+* 🔧 Complex data structures requiring incremental writes
+* 🔧 You want to keep samples alive longer than the operation
 
 ## Performance Considerations
 
 The convenience methods add minimal overhead:
 
-- **`Send(T)`**: One extra struct copy compared to manual loan/write/send
-- **`SendWith(ref T)`**: Same performance as manual approach (direct reference)
-- **`SendLazy(Func<T>)`**: Slight overhead from lambda invocation
-- **`TryReceiveValue<T>()`**: One extra struct copy
-- **`ProcessSample<T>()`**: No extra overhead, just automatic disposal
+* **`Send(T)`**: One extra struct copy compared to manual loan/write/send
+* **`SendWith(ref T)`**: Same performance as manual approach (direct reference)
+* **`SendLazy(Func<T>)`**: Slight overhead from lambda invocation
+* **`TryReceiveValue<T>()`**: One extra struct copy
+* **`ProcessSample<T>()`**: No extra overhead, just automatic disposal
 
 For 99% of use cases, the convenience is worth the minimal overhead. Optimize only when profiling shows a bottleneck.
 

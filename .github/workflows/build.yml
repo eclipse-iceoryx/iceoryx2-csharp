@@ -198,3 +198,16 @@ jobs:
             --source https://api.nuget.org/v3/index.json \
             --skip-duplicate
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+
+  markdown-lint:
+    name: Markdown Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: markdownlint-cli2-action
+        uses: DavidAnson/markdownlint-cli2-action@v9
+        with:
+          config: .markdownlint.yaml
+          globs: |
+            README.md

@@ -131,6 +131,7 @@ await foreach (var evt in waitSet.Events(ct).Where(e => e.IsFrom(guard1)))
 ### Step 1: Replace Callback with Async Foreach
 
 **Old:**
+
 ```csharp
 var result = waitSet.WaitAndProcess(attachmentId =>
 {
@@ -140,6 +141,7 @@ var result = waitSet.WaitAndProcess(attachmentId =>
 ```
 
 **New:**
+
 ```csharp
 await foreach (var evt in waitSet.Events(cancellationToken))
 {
@@ -218,10 +220,10 @@ Shutting down...
 
 ## Key Takeaways
 
-- ✅ **Use `Events()` for new code** - it's safer and more idiomatic
-- ✅ **No more busy-loop risk** - the library handles event consumption
-- ✅ **Clean async/await pattern** - integrates naturally with modern C#
-- ✅ **Powerful composition** - works with async LINQ operators
-- ⚠️ **Callback API still available** - for advanced scenarios requiring fine-grained control
+* ✅ **Use `Events()` for new code** - it's safer and more idiomatic
+* ✅ **No more busy-loop risk** - the library handles event consumption
+* ✅ **Clean async/await pattern** - integrates naturally with modern C#
+* ✅ **Powerful composition** - works with async LINQ operators
+* ⚠️ **Callback API still available** - for advanced scenarios requiring fine-grained control
 
 The `IAsyncEnumerable` API represents the recommended approach for WaitSet event processing in modern C# applications.

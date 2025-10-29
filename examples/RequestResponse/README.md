@@ -1,4 +1,4 @@
-# Request-Response Example in C#
+# Request-Response Example in C #
 
 > [!CAUTION]
 > Every payload you transmit with iceoryx2 must be compatible with shared
@@ -57,8 +57,9 @@ to the console.
 ## How to Build
 
 Before proceeding, ensure you have:
-- .NET 8.0 SDK or later
-- The iceoryx2 C FFI library built (`cargo build --release --package iceoryx2-ffi-c`)
+
+* .NET 8.0 SDK or later
+* The iceoryx2 C FFI library built (`cargo build --release --package iceoryx2-ffi-c`)
 
 Build the example:
 
@@ -97,6 +98,7 @@ efficiently.
 ## Example Output
 
 ### Server Output
+
 ```
 Starting server...
 Server ready to receive requests!
@@ -110,6 +112,7 @@ received request: 2
 ```
 
 ### Client Output
+
 ```
 Starting client...
 Client started. Sending requests...
@@ -124,10 +127,10 @@ send request 2 ...
 
 ## Key Features Demonstrated
 
-- **Request-Response Pattern**: Client-server RPC communication
-- **Streaming Responses**: Server can send multiple responses per request
-- **Zero-Copy API**: Using `Loan()` for efficient memory sharing
-- **Copy API**: Using `SendCopy()` and `SendCopyResponse()` for convenience
-- **Resource Management**: Proper disposal of requests, responses, and pending responses
-- **Type Safety**: Generic `RequestResponse<TRequest, TResponse>` with compile-time checks
-- **Cross-Language Compatible**: Uses `ulong` (u64) and `TransmissionData` struct compatible with C/C++/Rust
+* **Request-Response Pattern**: Client-server RPC communication
+* **Streaming Responses**: Server can send multiple responses per request
+* **Zero-Copy API**: Using `Loan()` for efficient memory sharing
+* **Copy API**: Using `SendCopy()` and `SendCopyResponse()` for convenience
+* **Resource Management**: Proper disposal of requests, responses, and pending responses
+* **Type Safety**: Generic `RequestResponse<TRequest, TResponse>` with compile-time checks
+* **Cross-Language Compatible**: Uses `ulong` (u64) and `TransmissionData` struct compatible with C/C++/Rust

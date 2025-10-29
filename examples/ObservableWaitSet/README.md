@@ -19,18 +19,20 @@ The example provides:
 Rx.NET provides a powerful functional reactive programming model for composing asynchronous and event-based programs using observable sequences.
 
 **Benefits:**
-- **Declarative**: Express complex event processing logic declaratively
-- **Composable**: Chain operators to build sophisticated processing pipelines
-- **Time-based**: Built-in support for throttling, buffering, windowing
-- **Async-friendly**: Seamless integration with async/await
+
+* **Declarative**: Express complex event processing logic declaratively
+* **Composable**: Chain operators to build sophisticated processing pipelines
+* **Time-based**: Built-in support for throttling, buffering, windowing
+* **Async-friendly**: Seamless integration with async/await
 
 ### WaitSet Observable Extension
 
 The example includes a `ToObservable()` extension method that:
-- Wraps WaitSet event processing in an Observable
-- Runs WaitSet in background Task
-- Properly handles cancellation and disposal
-- Emits `EventNotification` records with metadata (service name, event ID, timestamp)
+
+* Wraps WaitSet event processing in an Observable
+* Runs WaitSet in background Task
+* Properly handles cancellation and disposal
+* Emits `EventNotification` records with metadata (service name, event ID, timestamp)
 
 ## Building
 
@@ -55,6 +57,7 @@ dotnet run --framework net8.0 -- observe service_a service_b
 ```
 
 Output:
+
 ```
 Creating Observable for services: 'service_a', 'service_b'
 
@@ -98,6 +101,7 @@ eventStream.Subscribe(
 ```
 
 **Output:**
+
 ```
 [10:23:45.123] Service 'service_a' → Event ID: 123
 [10:23:46.456] Service 'service_b' → Event ID: 456
@@ -114,6 +118,7 @@ eventStream
 ```
 
 **Output:**
+
 ```
 Filtered: service_a → 123
 ```
@@ -134,6 +139,7 @@ eventStream
 ```
 
 **Output:**
+
 ```
 Stats: 'service_a' received 5 events in last 5s
 Stats: 'service_b' received 3 events in last 5s
@@ -151,6 +157,7 @@ eventStream
 ```
 
 **Output:**
+
 ```
 Throttled: service_a → 123
 [... 1 second passes ...]
@@ -172,6 +179,7 @@ service1Stream
 ```
 
 **Output:**
+
 ```
 Pair: [service_a:123] + [service_b:456]
 ```
@@ -278,33 +286,35 @@ eventStream
 
 ## Dependencies
 
-- **System.Reactive** (v6.0.1): Reactive Extensions for .NET
-  - Observable sequences
-  - LINQ-style operators
-  - Schedulers for time-based operations
+* **System.Reactive** (v6.0.1): Reactive Extensions for .NET
+    * Observable sequences
+    * LINQ-style operators
+    * Schedulers for time-based operations
 
 ## Cross-Platform Support
 
 Works on:
-- ✅ **Linux** (epoll)
-- ✅ **macOS** (kqueue)
-- ✅ **Windows** (custom implementation)
+
+* ✅ **Linux** (epoll)
+* ✅ **macOS** (kqueue)
+* ✅ **Windows** (custom implementation)
 
 ## Performance Considerations
 
-- **Zero Polling**: WaitSet uses OS-level event notification
-- **Efficient**: Operators use lazy evaluation
-- **Scalable**: Can handle high-frequency events with throttling/sampling
-- **Memory**: Buffering operators may accumulate events - use time limits
+* **Zero Polling**: WaitSet uses OS-level event notification
+* **Efficient**: Operators use lazy evaluation
+* **Scalable**: Can handle high-frequency events with throttling/sampling
+* **Memory**: Buffering operators may accumulate events - use time limits
 
 ## Next Steps
 
 Explore more Rx.NET operators:
-- `Sample()` - Periodic sampling
-- `Timeout()` - Detect missing events
-- `Retry()` - Automatic retry on errors
-- `Merge()` - Combine multiple observables
-- `CombineLatest()` - Combine latest values
-- `ObserveOn()` - Control threading
+
+* `Sample()` - Periodic sampling
+* `Timeout()` - Detect missing events
+* `Retry()` - Automatic retry on errors
+* `Merge()` - Combine multiple observables
+* `CombineLatest()` - Combine latest values
+* `ObserveOn()` - Control threading
 
 For more information, see [Rx.NET Documentation](https://github.com/dotnet/reactive).
