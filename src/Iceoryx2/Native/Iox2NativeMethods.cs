@@ -68,6 +68,7 @@ internal static partial class Iox2NativeMethods
     internal const int IOX2_OK = 0;
     internal const int IOX2_NODE_NAME_LENGTH = 128;
     internal const int IOX2_SERVICE_NAME_LENGTH = 255;
+    internal const int IOX2_SERVICE_ID_LENGTH = 32;
 
     // ========================================
     // Enums
@@ -93,6 +94,21 @@ internal static partial class Iox2NativeMethods
     {
         FIXED_SIZE = 0,
         DYNAMIC = 1
+    }
+
+    internal enum iox2_messaging_pattern_e
+    {
+        PUBLISH_SUBSCRIBE = 0,
+        EVENT = 1,
+        REQUEST_RESPONSE = 2,
+        BLACKBOARD = 3
+    }
+
+    internal enum iox2_service_list_error_e
+    {
+        INSUFFICIENT_PERMISSIONS = 1,
+        INTERNAL_ERROR = 2,
+        INTERRUPT = 3
     }
 
     // ========================================
@@ -470,6 +486,125 @@ internal static partial class Iox2NativeMethods
         out IntPtr node_handle);
 
     // ========================================
+    // Service Discovery - Type Details
+    // ========================================
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct iox2_type_detail_t
+    {
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 256)]
+        public byte[] type_name;
+        public int type_name_len;
+        public ulong size;
+        public ulong alignment;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct iox2_message_type_details_t
+    {
+        public iox2_type_detail_t header;
+        public iox2_type_detail_t user_header;
+        public iox2_type_detail_t payload;
+    }
+
+    // ========================================
+    // Service Discovery - Static Config Structs
+    // ========================================
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct iox2_static_config_event_t
+    {
+        public UIntPtr max_notifiers;
+        public UIntPtr max_listeners;
+        public UIntPtr max_nodes;
+        public UIntPtr event_id_max_value;
+        public UIntPtr notifier_dead_event;
+        [MarshalAs(UnmanagedType.U1)]
+        public bool has_notifier_dead_event;
+        public UIntPtr notifier_dropped_event;
+        [MarshalAs(UnmanagedType.U1)]
+        public bool has_notifier_dropped_event;
+        public UIntPtr notifier_created_event;
+        [MarshalAs(UnmanagedType.U1)]
+        public bool has_notifier_created_event;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct iox2_static_config_publish_subscribe_t
+    {
+        public UIntPtr max_subscribers;
+        public UIntPtr max_publishers;
+        public UIntPtr max_nodes;
+        public UIntPtr history_size;
+        public UIntPtr subscriber_max_buffer_size;
+        public UIntPtr subscriber_max_borrowed_samples;
+        [MarshalAs(UnmanagedType.U1)]
+        public bool enable_safe_overflow;
+        public iox2_message_type_details_t message_type_details;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct iox2_static_config_request_response_t
+    {
+        [MarshalAs(UnmanagedType.U1)]
+        public bool enable_safe_overflow_for_requests;
+        [MarshalAs(UnmanagedType.U1)]
+        public bool enable_safe_overflow_for_responses;
+        [MarshalAs(UnmanagedType.U1)]
+        public bool enable_fire_and_forget_requests;
+        public UIntPtr max_active_requests_per_client;
+        public UIntPtr max_loaned_requests;
+        public UIntPtr max_response_buffer_size;
+        public UIntPtr max_servers;
+        public UIntPtr max_clients;
+        public UIntPtr max_nodes;
+        public UIntPtr max_borrowed_responses_per_pending_response;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct iox2_static_config_blackboard_t
+    {
+        public UIntPtr max_readers;
+        public UIntPtr max_writers;
+        public UIntPtr max_nodes;
+        public iox2_type_detail_t type_details;
+    }
+
+    [StructLayout(LayoutKind.Explicit)]
+    internal struct iox2_static_config_details_t
+    {
+        [FieldOffset(0)]
+        public iox2_static_config_event_t @event;
+        [FieldOffset(0)]
+        public iox2_static_config_publish_subscribe_t publish_subscribe;
+        [FieldOffset(0)]
+        public iox2_static_config_request_response_t request_response;
+        [FieldOffset(0)]
+        public iox2_static_config_blackboard_t blackboard;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct iox2_static_config_t
+    {
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = IOX2_SERVICE_ID_LENGTH)]
+        public byte[] id;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = IOX2_SERVICE_NAME_LENGTH)]
+        public byte[] name;
+        public iox2_messaging_pattern_e messaging_pattern;
+        public iox2_static_config_details_t details;
+        public IntPtr attributes;  // iox2_attribute_set_h_ref
+    }
+
+    // ========================================
+    // Service Discovery - Callback Delegate
+    // ========================================
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    internal delegate iox2_callback_progression_e iox2_service_list_callback(
+        IntPtr static_config_ptr,
+        IntPtr callback_context);
+
+    // ========================================
     // Node API
     // ========================================
 
@@ -481,6 +616,17 @@ internal static partial class Iox2NativeMethods
         ref IntPtr node_handle,  // Pass by reference - C expects pointer to handle
         IntPtr service_builder_struct_ptr,  // Changed to IntPtr to allow passing NULL
         IntPtr service_name_ptr);
+
+    // ========================================
+    // Service Discovery API
+    // ========================================
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern int iox2_service_list(
+        iox2_service_type_e service_type,
+        IntPtr config_ptr,  // iox2_config_ptr - can be null
+        iox2_service_list_callback callback,
+        IntPtr callback_context);
 
     // ========================================
     // Node Name API

@@ -55,6 +55,8 @@ namespace Iceoryx2.ErrorHandling
         WaitSetRunFailed,
         /// <summary>Connection update failed.</summary>
         ConnectionUpdateFailed,
+        /// <summary>Service discovery failed.</summary>
+        ServiceListFailed,
         /// <summary>Unknown error.</summary>
         Unknown
     }

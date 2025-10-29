@@ -39,6 +39,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WaitSetAsyncEnumerable", "e
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QualityOfService", "examples\QualityOfService\QualityOfService.csproj", "{6E49893E-EBFA-46BE-BE18-E1C1CC1F186F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceDiscovery", "examples\ServiceDiscovery\ServiceDiscovery.csproj", "{B8D63E2A-B1F4-47A4-8793-B117D9649369}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -241,6 +243,18 @@ Global
 		{6E49893E-EBFA-46BE-BE18-E1C1CC1F186F}.Release|x64.Build.0 = Release|Any CPU
 		{6E49893E-EBFA-46BE-BE18-E1C1CC1F186F}.Release|x86.ActiveCfg = Release|Any CPU
 		{6E49893E-EBFA-46BE-BE18-E1C1CC1F186F}.Release|x86.Build.0 = Release|Any CPU
+		{B8D63E2A-B1F4-47A4-8793-B117D9649369}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8D63E2A-B1F4-47A4-8793-B117D9649369}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8D63E2A-B1F4-47A4-8793-B117D9649369}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B8D63E2A-B1F4-47A4-8793-B117D9649369}.Debug|x64.Build.0 = Debug|Any CPU
+		{B8D63E2A-B1F4-47A4-8793-B117D9649369}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B8D63E2A-B1F4-47A4-8793-B117D9649369}.Debug|x86.Build.0 = Debug|Any CPU
+		{B8D63E2A-B1F4-47A4-8793-B117D9649369}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8D63E2A-B1F4-47A4-8793-B117D9649369}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8D63E2A-B1F4-47A4-8793-B117D9649369}.Release|x64.ActiveCfg = Release|Any CPU
+		{B8D63E2A-B1F4-47A4-8793-B117D9649369}.Release|x64.Build.0 = Release|Any CPU
+		{B8D63E2A-B1F4-47A4-8793-B117D9649369}.Release|x86.ActiveCfg = Release|Any CPU
+		{B8D63E2A-B1F4-47A4-8793-B117D9649369}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -260,5 +274,6 @@ Global
 		{E18D3E1E-7824-4346-9A03-C3A7C50E48E7} = {BC3A1E43-FC68-4656-A0AC-705B63F41D3C}
 		{5CD461C6-9067-4CD7-AA91-EE377DDAC48F} = {BC3A1E43-FC68-4656-A0AC-705B63F41D3C}
 		{6E49893E-EBFA-46BE-BE18-E1C1CC1F186F} = {BC3A1E43-FC68-4656-A0AC-705B63F41D3C}
+		{B8D63E2A-B1F4-47A4-8793-B117D9649369} = {BC3A1E43-FC68-4656-A0AC-705B63F41D3C}
 	EndGlobalSection
 EndGlobal

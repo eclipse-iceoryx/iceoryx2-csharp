@@ -71,7 +71,7 @@ public sealed class NodeBuilder
                 return Result<Node, Iox2Error>.Err(Iox2Error.NodeCreationFailed);
 
             var handle = new SafeNodeHandle(nodeHandle);
-            var node = new Node(handle);
+            var node = new Node(handle, serviceType);
 
             return Result<Node, Iox2Error>.Ok(node);
         }
