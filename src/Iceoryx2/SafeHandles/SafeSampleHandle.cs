@@ -9,6 +9,8 @@ internal sealed class SafeSampleHandle : SafeIox2Handle
 {
     private readonly bool _isMutable;
 
+    public bool IsMutable => _isMutable;
+
     public SafeSampleHandle(bool isMutable = false) : base()
     {
         _isMutable = isMutable;

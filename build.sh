@@ -15,7 +15,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+REPO_ROOT="$SCRIPT_DIR/iceoryx2"
 
 echo "======================================"
 echo "iceoryx2 C# Bindings Build Script"
@@ -40,18 +40,7 @@ fi
 echo -e "${GREEN}✓ C FFI library built successfully${NC}"
 echo ""
 
-# Step 2: Generate C# bindings (optional - using ClangSharp)
-echo -e "${YELLOW}Step 2: Generating C# bindings...${NC}"
-cd "$SCRIPT_DIR/generator"
-
-if dotnet run; then
-    echo -e "${GREEN}✓ C# bindings generated successfully${NC}"
-else
-    echo -e "${YELLOW}⚠ Binding generation had warnings (using manual bindings)${NC}"
-fi
-echo ""
-
-# Step 3: Build the C# library
+# Step 2: Build the C# library
 echo -e "${YELLOW}Step 3: Building C# library...${NC}"
 cd "$SCRIPT_DIR"
 
@@ -63,7 +52,7 @@ fi
 echo -e "${GREEN}✓ C# library built successfully${NC}"
 echo ""
 
-# Step 4: Run tests
+# Step 3: Run tests
 echo -e "${YELLOW}Step 4: Running tests...${NC}"
 
 if dotnet test; then
@@ -73,7 +62,7 @@ else
 fi
 echo ""
 
-# Step 5: Build examples
+# Step 4: Build examples
 echo -e "${YELLOW}Step 5: Building examples...${NC}"
 
 cd "$SCRIPT_DIR/examples/PublishSubscribe"

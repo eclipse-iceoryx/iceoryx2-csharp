@@ -26,10 +26,22 @@ public sealed class Sample<T> : IDisposable where T : unmanaged
         {
             ThrowIfDisposed();
             var sampleHandle = _handle.DangerousGetHandle();
-            Native.Iox2NativeMethods.iox2_sample_payload(
-                ref sampleHandle,  // _ref type needs ref to pass pointer-to-pointer
-                out var payloadPtr,
-                out var payloadLen);
+            IntPtr payloadPtr;
+
+            if (_handle.IsMutable)
+            {
+                Native.Iox2NativeMethods.iox2_sample_mut_payload_mut_ptr(
+                    ref sampleHandle,
+                    out payloadPtr,
+                    IntPtr.Zero);
+            }
+            else
+            {
+                Native.Iox2NativeMethods.iox2_sample_payload(
+                    ref sampleHandle,
+                    out payloadPtr,
+                    out _);
+            }
 
             if (payloadPtr == IntPtr.Zero)
                 throw new InvalidOperationException("Failed to get sample payload");
@@ -75,6 +87,65 @@ public sealed class Sample<T> : IDisposable where T : unmanaged
                 Marshal.FreeHGlobal(tmp);
             }
         }
+    }
+
+    /// <summary>
+    /// Gets a mutable reference to the payload data in shared memory.
+    /// This allows zero-copy access to the data.
+    /// Throws InvalidOperationException if the sample is read-only (received from a subscriber).
+    /// </summary>
+    public unsafe ref T GetPayloadRef()
+    {
+        ThrowIfDisposed();
+        
+        if (!_handle.IsMutable)
+            throw new InvalidOperationException("Cannot get mutable reference to read-only sample. Use GetPayloadRefReadOnly() instead.");
+
+        var sampleHandle = _handle.DangerousGetHandle();
+        IntPtr payloadPtr;
+        
+        Native.Iox2NativeMethods.iox2_sample_mut_payload_mut_ptr(
+            ref sampleHandle,
+            out payloadPtr,
+            IntPtr.Zero);
+
+        if (payloadPtr == IntPtr.Zero)
+            throw new InvalidOperationException("Failed to get sample payload");
+
+        return ref System.Runtime.CompilerServices.Unsafe.AsRef<T>(payloadPtr.ToPointer());
+    }
+
+    /// <summary>
+    /// Gets a read-only reference to the payload data in shared memory.
+    /// This allows zero-copy access to the data.
+    /// Works for both loaned samples (mutable) and received samples (read-only).
+    /// </summary>
+    public unsafe ref readonly T GetPayloadRefReadOnly()
+    {
+        ThrowIfDisposed();
+        
+        var sampleHandle = _handle.DangerousGetHandle();
+        IntPtr payloadPtr;
+        
+        if (_handle.IsMutable)
+        {
+            Native.Iox2NativeMethods.iox2_sample_mut_payload_mut_ptr(
+                ref sampleHandle,
+                out payloadPtr,
+                IntPtr.Zero);
+        }
+        else
+        {
+            Native.Iox2NativeMethods.iox2_sample_payload(
+                ref sampleHandle,
+                out payloadPtr,
+                out _);
+        }
+
+        if (payloadPtr == IntPtr.Zero)
+            throw new InvalidOperationException("Failed to get sample payload");
+
+        return ref System.Runtime.CompilerServices.Unsafe.AsRef<T>(payloadPtr.ToPointer());
     }
 
     /// <summary>
