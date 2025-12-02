@@ -62,18 +62,6 @@ else
 fi
 echo ""
 
-# Step 4: Build examples
-echo -e "${YELLOW}Step 5: Building examples...${NC}"
-
-cd "$SCRIPT_DIR/examples/PublishSubscribe"
-if dotnet build; then
-    echo -e "${GREEN}✓ Examples built successfully${NC}"
-else
-    echo -e "${RED}✗ Failed to build examples${NC}"
-    exit 1
-fi
-echo ""
-
 echo -e "${GREEN}======================================"
 echo "✓ Build completed successfully!"
 echo "======================================${NC}"
