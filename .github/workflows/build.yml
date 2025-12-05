@@ -112,6 +112,9 @@ jobs:
       - name: Restore .NET dependencies
         run: dotnet restore
 
+      - name: Verify Code Formatting
+        run: dotnet format --verify-no-changes --verbosity diagnostic
+
       - name: Build .NET solution
         run: dotnet build --configuration Release --no-restore
 
