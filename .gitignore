@@ -1,0 +1,46 @@
+# .gitignore for C# bindings
+
+# Build results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual Studio cache/options
+.vs/
+.vscode/
+.idea/
+
+# ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+
+# Test results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.trx
+
+# Native libraries
+*.dll
+*.so
+*.dylib
+runtimes/
+
+.DS_Store
+
+
+# github action act artifact files
+.artifacts/

@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+    <!-- Copy native library from Iceoryx2 output directory -->
+    <Target Name="CopyNativeLibrary" AfterTargets="Build">
+        <ItemGroup>
+        <NativeLibs Include="../../src/Iceoryx2/bin/$(Configuration)/$(TargetFramework)/libiceoryx2_ffi_c.*" />
+        </ItemGroup>
+        <Copy SourceFiles="@(NativeLibs)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" />
+    </Target>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/Iceoryx2/Iceoryx2.csproj" />
+    <ProjectReference Include="../../src/Iceoryx2.Reactive/Iceoryx2.Reactive.csproj" />
+    <PackageReference Include="System.Reactive" Version="6.0.1" />
+  </ItemGroup>
+
+</Project>

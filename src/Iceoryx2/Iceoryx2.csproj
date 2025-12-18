@@ -1,0 +1,94 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    
+    <!-- Package Information -->
+    <PackageId>Iceoryx2</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>Contributors to the Eclipse Foundation</Authors>
+    <Company>Eclipse iceoryx</Company>
+    <Description>Zero-Copy Lock-Free Inter-process Communication for .NET</Description>
+    <PackageLicenseExpression>Apache-2.0 OR MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/eclipse-iceoryx/iceoryx2</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/eclipse-iceoryx/iceoryx2</RepositoryUrl>
+    <PackageTags>ipc;inter-process-communication;zero-copy;shared-memory;publish-subscribe;request-response</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryType>git</RepositoryType>
+    <PackageReleaseNotes>See CHANGELOG.md for release notes</PackageReleaseNotes>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="**/*.cs" Exclude="bin/**;obj/**" />
+  </ItemGroup>
+
+  <!-- Include README and icon in package -->
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
+  <!-- Package native libraries for different platforms -->
+  <ItemGroup>
+    <!-- macOS (osx-x64 and osx-arm64) -->
+    <None Include="../../iceoryx2/target/release/libiceoryx2_ffi_c.dylib" 
+          Pack="true" 
+          PackagePath="runtimes/osx-x64/native/libiceoryx2_ffi_c.dylib"
+          Condition="Exists('../../iceoryx2/target/release/libiceoryx2_ffi_c.dylib')" />
+    <None Include="../../iceoryx2/target/release/libiceoryx2_ffi_c.dylib" 
+          Pack="true" 
+          PackagePath="runtimes/osx-arm64/native/libiceoryx2_ffi_c.dylib"
+          Condition="Exists('../../iceoryx2/target/release/libiceoryx2_ffi_c.dylib')" />
+    
+    <!-- Linux x64 -->
+    <None Include="../../iceoryx2/target/release/libiceoryx2_ffi_c.so" 
+          Pack="true" 
+          PackagePath="runtimes/linux-x64/native/libiceoryx2_ffi_c.so"
+          Condition="Exists('../../iceoryx2/target/release/libiceoryx2_ffi_c.so')" />
+    
+    <!-- Windows x64 -->
+    <None Include="../../iceoryx2/target/release/iceoryx2_ffi_c.dll" 
+          Pack="true" 
+          PackagePath="runtimes/win-x64/native/iceoryx2_ffi_c.dll"
+          Condition="Exists('../../iceoryx2/target/release/iceoryx2_ffi_c.dll')" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Memory" Version="4.5.5" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
+  </ItemGroup>
+
+  <!-- Copy native library to output directory of any project referencing this library -->
+  <Target Name="CopyNativeLibrary" AfterTargets="Build">
+    <PropertyGroup>
+      <!-- Path relative to this .csproj file location (src/Iceoryx2/) -->
+      <NativeLibrarySourcePath>$(MSBuildThisFileDirectory)../../iceoryx2/target/release/libiceoryx2_ffi_c.dylib</NativeLibrarySourcePath>
+      <NativeLibrarySourcePathLinux>$(MSBuildThisFileDirectory)../../iceoryx2/target/release/libiceoryx2_ffi_c.so</NativeLibrarySourcePathLinux>
+      <NativeLibrarySourcePathWindows>$(MSBuildThisFileDirectory)../../iceoryx2/target/release/iceoryx2_ffi_c.dll</NativeLibrarySourcePathWindows>
+    </PropertyGroup>
+    
+    <!-- macOS -->
+    <Copy SourceFiles="$(NativeLibrarySourcePath)" 
+          DestinationFolder="$(OutputPath)" 
+          Condition="Exists('$(NativeLibrarySourcePath)')"
+          SkipUnchangedFiles="true" />
+    
+    <!-- Linux -->
+    <Copy SourceFiles="$(NativeLibrarySourcePathLinux)" 
+          DestinationFolder="$(OutputPath)" 
+          Condition="Exists('$(NativeLibrarySourcePathLinux)')"
+          SkipUnchangedFiles="true" />
+    
+    <!-- Windows -->
+    <Copy SourceFiles="$(NativeLibrarySourcePathWindows)" 
+          DestinationFolder="$(OutputPath)" 
+          Condition="Exists('$(NativeLibrarySourcePathWindows)')"
+          SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>

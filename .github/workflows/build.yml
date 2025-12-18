@@ -1,0 +1,221 @@
+name: Build and Package
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-native:
+    name: Build Native Library - ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact-name: linux-x64
+            lib-name: libiceoryx2_ffi_c.so
+          - os: macos-latest
+            artifact-name: osx-x64
+            lib-name: libiceoryx2_ffi_c.dylib
+          # - os: windows-latest
+          #   artifact-name: win-x64
+          #   lib-name: iceoryx2_ffi_c.dll
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libclang-dev clang
+
+      - name: Install dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install llvm
+          echo "LIBCLANG_PATH=$(brew --prefix llvm)/lib" >> $GITHUB_ENV
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Cache Rust dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            iceoryx2/target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('iceoryx2/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Build iceoryx2 C FFI library (Unix)
+        if: runner.os != 'Windows'
+        working-directory: iceoryx2
+        run: cargo build --release --package iceoryx2-ffi-c
+
+      - name: Build iceoryx2 C FFI library (Windows)
+        if: runner.os == 'Windows'
+        working-directory: iceoryx2
+        run: cargo build --release --package iceoryx2-ffi-c
+
+      - name: Upload native library artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-${{ matrix.artifact-name }}
+          path: iceoryx2/target/release/${{ matrix.lib-name }}
+          if-no-files-found: error
+
+  build-dotnet:
+    name: Build .NET Library
+    needs: build-native
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+
+      - name: Download all native libraries
+        uses: actions/download-artifact@v4
+        with:
+          path: native-libs
+
+      - name: Copy native libraries to target directory
+        run: |
+          mkdir -p iceoryx2/target/release
+          cp native-libs/native-linux-x64/libiceoryx2_ffi_c.so iceoryx2/target/release/ || true
+          cp native-libs/native-osx-x64/libiceoryx2_ffi_c.dylib iceoryx2/target/release/ || true
+          cp native-libs/native-win-x64/iceoryx2_ffi_c.dll iceoryx2/target/release/ || true
+          ls -la iceoryx2/target/release/
+
+      - name: Restore .NET dependencies
+        run: dotnet restore
+
+      - name: Verify Code Formatting
+        run: dotnet format --verify-no-changes --verbosity diagnostic
+
+      - name: Build .NET solution
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Run tests
+        run: dotnet test --configuration Release --no-build --verbosity normal
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-build
+          path: |
+            src/Iceoryx2/bin/Release/
+            src/Iceoryx2.Reactive/bin/Release/
+
+  create-nuget-package:
+    name: Create NuGet Packages
+    needs: build-dotnet
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+
+      - name: Download all native libraries
+        uses: actions/download-artifact@v4
+        with:
+          path: native-libs
+
+      - name: Copy native libraries to target directory
+        run: |
+          mkdir -p iceoryx2/target/release
+          cp native-libs/native-linux-x64/libiceoryx2_ffi_c.so iceoryx2/target/release/ || true
+          cp native-libs/native-osx-x64/libiceoryx2_ffi_c.dylib iceoryx2/target/release/ || true
+          cp native-libs/native-win-x64/iceoryx2_ffi_c.dll iceoryx2/target/release/ || true
+          ls -la iceoryx2/target/release/
+
+      - name: Create NuGet package - Iceoryx2
+        run: dotnet pack src/Iceoryx2/Iceoryx2.csproj --configuration Release --output ./nupkgs
+
+      - name: Create NuGet package - Iceoryx2.Reactive
+        run: dotnet pack src/Iceoryx2.Reactive/Iceoryx2.Reactive.csproj --configuration Release --output ./nupkgs
+
+      - name: List NuGet packages
+        run: ls -lh ./nupkgs/
+
+      - name: Upload NuGet packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-packages
+          path: nupkgs/*.nupkg
+          if-no-files-found: error
+
+  # NOTE: NuGet publishing is disabled until Eclipse formal review process
+  # for binary releases is completed. The packages are still built and
+  # available as artifacts. To re-enable, uncomment this job and add
+  # NUGET_API_KEY secret to the repository.
+  #
+  # publish-nuget:
+  #   name: Publish to NuGet (on tag)
+  #   needs: create-nuget-package
+  #   runs-on: ubuntu-latest
+  #   if: startsWith(github.ref, 'refs/tags/')
+  #
+  #   steps:
+  #     - name: Download NuGet packages
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: nuget-packages
+  #         path: nupkgs
+  #
+  #     - name: Setup .NET
+  #       uses: actions/setup-dotnet@v4
+  #       with:
+  #         dotnet-version: 8.0.x
+  #
+  #     - name: Publish to NuGet.org
+  #       run: |
+  #         dotnet nuget push nupkgs/*.nupkg \
+  #           --api-key ${{ secrets.NUGET_API_KEY }} \
+  #           --source https://api.nuget.org/v3/index.json \
+  #           --skip-duplicate
+  #       if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+
+  markdown-lint:
+    name: Markdown Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: markdownlint-cli2-action
+        uses: DavidAnson/markdownlint-cli2-action@v20
+        with:
+          config: .markdownlint.yaml
+          globs: |
+            README.md

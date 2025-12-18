@@ -1,0 +1,55 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>latest</LangVersion>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    
+    <!-- NuGet Package Metadata -->
+    <PackageId>Iceoryx2.Reactive</PackageId>
+    <Version>0.1.0</Version>
+    <Description>Reactive Extensions (Rx) support for iceoryx2 - provides IObservable&lt;T&gt; and IAsyncEnumerable&lt;T&gt; patterns for declarative, composable pub/sub communication</Description>
+    <Authors>Eclipse iceoryx</Authors>
+    <Company>Eclipse Foundation</Company>
+    <PackageLicenseExpression>Apache-2.0 OR MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/eclipse-iceoryx/iceoryx2</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/eclipse-iceoryx/iceoryx2</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>iceoryx;iceoryx2;reactive;rx;observable;ipc;shared-memory;zero-copy;pub-sub</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>Initial release with IObservable&lt;T&gt; and IAsyncEnumerable&lt;T&gt; support for iceoryx2 subscribers.</PackageReleaseNotes>
+    <Copyright>Copyright (c) 2025 Contributors to the Eclipse Foundation</Copyright>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <!-- For local development, use ProjectReference -->
+  <ItemGroup Condition="Exists('../Iceoryx2/Iceoryx2.csproj')">
+    <ProjectReference Include="../Iceoryx2/Iceoryx2.csproj" />
+  </ItemGroup>
+
+  <!-- Package dependencies - Iceoryx2 is always declared as a dependency in the NuGet package -->
+  <ItemGroup>
+    <PackageReference Include="System.Reactive" Version="6.0.1" />
+    <!-- When building locally with ProjectReference, this won't be used, but it will be in the .nuspec -->
+    <PackageReference Include="Iceoryx2" Version="0.1.0" Condition="!Exists('../Iceoryx2/Iceoryx2.csproj')" />
+  </ItemGroup>
+
+  <!-- Ensure NuGet package includes Iceoryx2 as a dependency even when using ProjectReference -->
+  <ItemGroup>
+    <ProjectReference Update="../Iceoryx2/Iceoryx2.csproj">
+      <!-- Tell NuGet to include this as a package dependency when packing -->
+      <PrivateAssets></PrivateAssets>
+      <IncludeAssets>all</IncludeAssets>
+      <!-- This will generate a package dependency instead of including the DLL -->
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <SetTargetFramework>TargetFramework=net8.0</SetTargetFramework>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
+</Project>
