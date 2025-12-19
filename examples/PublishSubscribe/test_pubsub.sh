@@ -1,15 +1,15 @@
 #!/bin/bash
-cd /Users/patdhlk/src/patdhlk/iceoryx2/iceoryx2-ffi/csharp/examples/PublishSubscribe
+cd "$(dirname "$(readlink -f "$0")")" || exit
 
 # Start publisher in background
-dotnet run -c Release -- publisher &
+dotnet run -c Release --framework net8.0 -- publisher &
 PUB_PID=$!
 
 # Wait for publisher to start
 sleep 2
 
 # Run subscriber for 5 seconds
-dotnet run -c Release -- subscriber &
+dotnet run -c Release --framework net8.0 -- subscriber &
 SUB_PID=$!
 
 # Wait 5 seconds to see if data flows
