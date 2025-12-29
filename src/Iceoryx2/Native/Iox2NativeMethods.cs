@@ -612,11 +612,31 @@ internal static partial class Iox2NativeMethods
         IntPtr callback_context);
 
     // ========================================
+    // Node Wait Failure Enum
+    // ========================================
+
+    internal enum iox2_node_wait_failure_e
+    {
+        INTERRUPT = IOX2_OK + 1,
+        TERMINATION_REQUEST = IOX2_OK + 2
+    }
+
+    // ========================================
     // Node API
     // ========================================
 
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
     internal static extern void iox2_node_drop(IntPtr node_handle);
+
+    /// <summary>
+    /// Waits for the specified cycle time to pass.
+    /// Returns IOX2_OK on successful wait, or an error code if interrupted or termination was requested.
+    /// </summary>
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern int iox2_node_wait(
+        ref IntPtr node_handle,
+        ulong cycle_time_sec,
+        uint cycle_time_nsec);
 
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
     internal static extern IntPtr iox2_node_service_builder(
@@ -1405,4 +1425,305 @@ internal static partial class Iox2NativeMethods
 
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
     internal static extern IntPtr iox2_listener_get_file_descriptor(ref IntPtr listener_handle);
+
+    // ========================================
+    // Service Builder Blackboard API
+    // ========================================
+
+    /// <summary>
+    /// Creates a blackboard creator service builder from a generic service builder.
+    /// </summary>
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern IntPtr iox2_service_builder_blackboard_creator(IntPtr service_builder_handle);
+
+    /// <summary>
+    /// Creates a blackboard opener service builder from a generic service builder.
+    /// </summary>
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern IntPtr iox2_service_builder_blackboard_opener(IntPtr service_builder_handle);
+
+    /// <summary>
+    /// Sets the key type details for the blackboard creator.
+    /// </summary>
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern int iox2_service_builder_blackboard_creator_set_key_type_details(
+        ref IntPtr service_builder_handle,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string type_name,
+        int type_name_len,
+        ulong type_size,
+        ulong type_alignment);
+
+    /// <summary>
+    /// Sets the key type details for the blackboard opener.
+    /// </summary>
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern int iox2_service_builder_blackboard_opener_set_key_type_details(
+        ref IntPtr service_builder_handle,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string type_name,
+        int type_name_len,
+        ulong type_size,
+        ulong type_alignment);
+
+    /// <summary>
+    /// Delegate for key equality comparison in blackboard.
+    /// </summary>
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    [return: MarshalAs(UnmanagedType.U1)]
+    internal delegate bool iox2_service_blackboard_key_eq_cmp_func(IntPtr lhs, IntPtr rhs);
+
+    /// <summary>
+    /// Sets the key equality comparison function for the blackboard creator.
+    /// </summary>
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern void iox2_service_builder_blackboard_creator_set_key_eq_comparison_function(
+        ref IntPtr service_builder_handle,
+        iox2_service_blackboard_key_eq_cmp_func key_eq_func);
+
+    /// <summary>
+    /// Delegate for releasing value pointer passed to add.
+    /// </summary>
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    internal delegate void iox2_service_blackboard_creator_add_release_callback(IntPtr value_ptr);
+
+    /// <summary>
+    /// Adds a key-value entry to the blackboard creator.
+    /// </summary>
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern void iox2_service_builder_blackboard_creator_add(
+        ref IntPtr service_builder_handle,
+        IntPtr key_ptr,
+        IntPtr value_ptr,
+        iox2_service_blackboard_creator_add_release_callback? release_callback,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string value_type_name,
+        int value_type_name_len,
+        ulong value_size,
+        ulong value_alignment);
+
+    /// <summary>
+    /// Sets the maximum number of readers for the blackboard creator.
+    /// </summary>
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern void iox2_service_builder_blackboard_creator_set_max_readers(
+        ref IntPtr service_builder_handle,
+        UIntPtr value);
+
+    /// <summary>
+    /// Sets the maximum number of readers for the blackboard opener.
+    /// </summary>
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern void iox2_service_builder_blackboard_opener_set_max_readers(
+        ref IntPtr service_builder_handle,
+        UIntPtr value);
+
+    /// <summary>
+    /// Sets the maximum number of nodes for the blackboard creator.
+    /// </summary>
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern void iox2_service_builder_blackboard_creator_set_max_nodes(
+        ref IntPtr service_builder_handle,
+        UIntPtr value);
+
+    /// <summary>
+    /// Sets the maximum number of nodes for the blackboard opener.
+    /// </summary>
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern void iox2_service_builder_blackboard_opener_set_max_nodes(
+        ref IntPtr service_builder_handle,
+        UIntPtr value);
+
+    /// <summary>
+    /// Opens an existing blackboard service.
+    /// </summary>
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern int iox2_service_builder_blackboard_open(
+        IntPtr service_builder_handle,
+        IntPtr port_factory_struct_ptr,
+        out IntPtr port_factory_handle);
+
+    /// <summary>
+    /// Creates a new blackboard service.
+    /// </summary>
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern int iox2_service_builder_blackboard_create(
+        IntPtr service_builder_handle,
+        IntPtr port_factory_struct_ptr,
+        out IntPtr port_factory_handle);
+
+    // ========================================
+    // Port Factory Blackboard API
+    // ========================================
+
+    /// <summary>
+    /// Drops the blackboard port factory handle.
+    /// </summary>
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern void iox2_port_factory_blackboard_drop(IntPtr port_factory_handle);
+
+    /// <summary>
+    /// Creates a writer builder from the blackboard port factory.
+    /// </summary>
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern IntPtr iox2_port_factory_blackboard_writer_builder(
+        ref IntPtr port_factory_handle,
+        IntPtr writer_builder_struct_ptr);
+
+    /// <summary>
+    /// Creates a reader builder from the blackboard port factory.
+    /// </summary>
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern IntPtr iox2_port_factory_blackboard_reader_builder(
+        ref IntPtr port_factory_handle,
+        IntPtr reader_builder_struct_ptr);
+
+    // ========================================
+    // Writer Builder API
+    // ========================================
+
+    /// <summary>
+    /// Creates a writer from the writer builder.
+    /// </summary>
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern int iox2_port_factory_writer_builder_create(
+        IntPtr writer_builder_handle,
+        IntPtr writer_struct_ptr,
+        out IntPtr writer_handle);
+
+    // ========================================
+    // Writer API
+    // ========================================
+
+    /// <summary>
+    /// Drops the writer handle.
+    /// </summary>
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern void iox2_writer_drop(IntPtr writer_handle);
+
+    /// <summary>
+    /// Gets a mutable entry handle for a key from the writer.
+    /// </summary>
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern int iox2_writer_entry(
+        ref IntPtr writer_handle,
+        IntPtr entry_handle_struct_ptr,
+        out IntPtr entry_handle_mut,
+        IntPtr key_ptr,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string value_type_name,
+        int value_type_name_len,
+        ulong value_size,
+        ulong value_alignment);
+
+    // ========================================
+    // Entry Handle Mut API
+    // ========================================
+
+    /// <summary>
+    /// Drops the mutable entry handle.
+    /// </summary>
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern void iox2_entry_handle_mut_drop(IntPtr entry_handle_mut);
+
+    /// <summary>
+    /// Updates the entry value by copying data.
+    /// </summary>
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern void iox2_entry_handle_mut_update_with_copy(
+        ref IntPtr entry_handle_mut,
+        IntPtr value_ptr,
+        ulong value_size,
+        ulong value_alignment);
+
+    /// <summary>
+    /// Loans an uninitialized entry value for writing.
+    /// </summary>
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern void iox2_entry_handle_mut_loan_uninit(
+        IntPtr entry_handle_mut,
+        IntPtr entry_value_struct_ptr,
+        out IntPtr entry_value_handle,
+        ulong value_size,
+        ulong value_alignment);
+
+    // ========================================
+    // Entry Value API (for loan-based updates)
+    // ========================================
+
+    /// <summary>
+    /// Gets a mutable pointer to the entry value's payload.
+    /// </summary>
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern void iox2_entry_value_mut(
+        ref IntPtr entry_value_handle,
+        out IntPtr payload_ptr);
+
+    /// <summary>
+    /// Updates the entry with the loaned value.
+    /// </summary>
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern void iox2_entry_value_update(
+        IntPtr entry_value_handle,
+        IntPtr entry_handle_struct_ptr,
+        out IntPtr entry_handle_mut);
+
+    /// <summary>
+    /// Drops the entry value handle without updating.
+    /// </summary>
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern void iox2_entry_value_drop(IntPtr entry_value_handle);
+
+    // ========================================
+    // Reader Builder API
+    // ========================================
+
+    /// <summary>
+    /// Creates a reader from the reader builder.
+    /// </summary>
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern int iox2_port_factory_reader_builder_create(
+        IntPtr reader_builder_handle,
+        IntPtr reader_struct_ptr,
+        out IntPtr reader_handle);
+
+    // ========================================
+    // Reader API
+    // ========================================
+
+    /// <summary>
+    /// Drops the reader handle.
+    /// </summary>
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern void iox2_reader_drop(IntPtr reader_handle);
+
+    /// <summary>
+    /// Gets an entry handle for a key from the reader.
+    /// </summary>
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern int iox2_reader_entry(
+        ref IntPtr reader_handle,
+        IntPtr entry_handle_struct_ptr,
+        out IntPtr entry_handle,
+        IntPtr key_ptr,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string value_type_name,
+        int value_type_name_len,
+        ulong value_size,
+        ulong value_alignment);
+
+    // ========================================
+    // Entry Handle API (read-only)
+    // ========================================
+
+    /// <summary>
+    /// Drops the entry handle.
+    /// </summary>
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern void iox2_entry_handle_drop(IntPtr entry_handle);
+
+    /// <summary>
+    /// Gets the current value from the entry handle.
+    /// </summary>
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern void iox2_entry_handle_get(
+        ref IntPtr entry_handle,
+        IntPtr value_ptr,
+        ulong value_size,
+        ulong value_alignment);
 }
