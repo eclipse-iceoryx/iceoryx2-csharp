@@ -4,5 +4,5 @@ contact_links:
     url: https://github.com/eclipse-iceoryx/iceoryx2
     about: Check the main iceoryx2 documentation for general IPC concepts
   - name: iceoryx2-csharp Examples
-    url: https://github.com/patdhlk/iceoryx2-csharp-int/tree/main/examples
+    url: https://github.com/eclipse-iceoryx2/iceoryx2-csharp/tree/main/examples
     about: Browse examples for common usage patterns
