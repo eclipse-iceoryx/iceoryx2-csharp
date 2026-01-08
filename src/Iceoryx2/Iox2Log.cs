@@ -18,26 +18,45 @@ namespace Iceoryx2;
 
 /// <summary>
 /// Provides logging functionality for iceoryx2.
-/// Allows configuration of log levels, custom loggers, and built-in file/console logging.
+/// Allows configuration of log levels, custom loggers, and built-in console/file logging.
 /// </summary>
+/// <remarks>
+/// <para>
+/// Starting with iceoryx2 v0.8.0, the console logger is enabled by default.
+/// The file logger requires rebuilding iceoryx2 with specific feature flags.
+/// </para>
+/// <para>
+/// Available loggers (configured via feature flags on iceoryx2-loggers crate):
+/// <list type="bullet">
+///   <item><description><b>console</b> - outputs to console (default)</description></item>
+///   <item><description><b>buffer</b> - outputs to a buffer</description></item>
+///   <item><description><b>file</b> - outputs to a file (requires rebuild with features)</description></item>
+///   <item><description><b>log</b> - utilizes the log crate</description></item>
+///   <item><description><b>tracing</b> - utilizes the tracing crate</description></item>
+/// </list>
+/// </para>
+/// <para>
+/// To enable the file logger, rebuild iceoryx2 with:
+/// <code>
+/// cargo build --package iceoryx2-ffi-c --features iceoryx2-loggers/std --features iceoryx2-loggers/file --no-default-features --release
+/// </code>
+/// </para>
+/// <para>
+/// Supported log levels: trace, debug, info, warning, error, fatal
+/// </para>
+/// </remarks>
 /// <example>
 /// <code>
 /// // Set log level from environment variable IOX2_LOG_LEVEL, default to Info
 /// Iox2Log.SetLogLevelFromEnvOrDefault();
-/// 
+///
 /// // Or set specific log level
 /// Iox2Log.SetLogLevel(LogLevel.Debug);
-/// 
-/// // Use console logger
-/// Iox2Log.UseConsoleLogger();
-/// 
-/// // Or use file logger
-/// Iox2Log.UseFileLogger("/tmp/iceoryx2.log");
-/// 
+///
 /// // Manual logging
 /// Iox2Log.Write(LogLevel.Info, "MyApp", "Application started");
-/// 
-/// // Custom logger
+///
+/// // Custom logger (set at runtime, must be done before any log messages)
 /// Iox2Log.SetLogger((level, origin, message) =>
 /// {
 ///     Console.WriteLine($"[{level}] {origin}: {message}");
@@ -81,26 +100,62 @@ public static class Iox2Log
     /// <summary>
     /// Sets the console logger as the default logger.
     /// </summary>
-    /// <returns>True if the logger was set successfully, false otherwise</returns>
+    /// <remarks>
+    /// <para>
+    /// Starting with iceoryx2 v0.8.0, the console logger is enabled by default.
+    /// This method is now a no-op and always returns true for backward compatibility.
+    /// </para>
+    /// <para>
+    /// To use a different logger backend, you can either:
+    /// <list type="bullet">
+    ///   <item><description>Use <see cref="SetLogger"/> to set a custom logger callback at runtime</description></item>
+    ///   <item><description>Rebuild iceoryx2 with different feature flags (e.g., file, log, tracing)</description></item>
+    /// </list>
+    /// </para>
+    /// </remarks>
+    /// <returns>Always returns true as the console logger is enabled by default</returns>
+    [Obsolete("Console logger is now enabled by default in iceoryx2 v0.8.0+. This method is a no-op.")]
     public static bool UseConsoleLogger()
     {
-        return Iox2NativeMethods.iox2_use_console_logger();
+        // Console logger is now enabled by default in iceoryx2 v0.8.0+
+        // This method is kept for backward compatibility
+        return true;
     }
 
     /// <summary>
     /// Sets the file logger as the default logger.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Starting with iceoryx2 v0.8.0, the file logger requires rebuilding the iceoryx2 native library
+    /// with specific feature flags. This method will throw <see cref="NotSupportedException"/> if the
+    /// native library was not built with file logger support.
+    /// </para>
+    /// <para>
+    /// To enable file logging, rebuild iceoryx2 with:
+    /// <code>
+    /// cargo build --package iceoryx2-ffi-c --features iceoryx2-loggers/std --features iceoryx2-loggers/file --no-default-features --release
+    /// </code>
+    /// </para>
+    /// <para>
+    /// Alternative: Use <see cref="SetLogger"/> to implement custom file logging at runtime.
+    /// </para>
+    /// </remarks>
     /// <param name="logFile">Path to the log file</param>
     /// <returns>True if the logger was set successfully, false otherwise</returns>
+    /// <exception cref="NotSupportedException">
+    /// Thrown when the native library was not built with file logger support.
+    /// </exception>
+    [Obsolete("File logger requires rebuilding iceoryx2 with --features iceoryx2-loggers/file. Consider using SetLogger() for custom file logging.")]
     public static bool UseFileLogger(string logFile)
     {
-        unsafe
-        {
-            fixed (byte* logFilePtr = System.Text.Encoding.UTF8.GetBytes(logFile + "\0"))
-            {
-                return Iox2NativeMethods.iox2_use_file_logger((IntPtr)logFilePtr);
-            }
-        }
+        // File logger requires rebuilding iceoryx2 with specific feature flags in v0.8.0+
+        // The native function iox2_use_file_logger has been removed from default builds
+        throw new NotSupportedException(
+            "File logger is not available in the default iceoryx2 build. " +
+            "To enable file logging, either:\n" +
+            "1. Rebuild iceoryx2 with: cargo build --package iceoryx2-ffi-c --features iceoryx2-loggers/std --features iceoryx2-loggers/file --no-default-features --release\n" +
+            "2. Use Iox2Log.SetLogger() to implement custom file logging at runtime.");
     }
 
     /// <summary>

@@ -4,6 +4,11 @@ This example demonstrates how to integrate iceoryx2's internal logging with the
 Microsoft.Extensions.Logging framework, allowing you to see iceoryx2's debug
 logs through your existing logging infrastructure.
 
+> **Note:** Starting with iceoryx2 v0.8.0, the console logger is enabled by
+> default. The integration examples in this project use `SetLogger()` to
+> redirect logs to Microsoft.Extensions.Logging, which continues to work
+> as before.
+
 ## Features
 
 The example showcases **4 different logging approaches**:

@@ -12,6 +12,7 @@
 
 using Iceoryx2;
 using System;
+using System.IO;
 
 class Program
 {
@@ -34,9 +35,9 @@ class Program
             Console.WriteLine("Usage: dotnet run [basic|custom|file]");
             Console.WriteLine();
             Console.WriteLine("Examples:");
-            Console.WriteLine("  dotnet run basic   - Use console logger with environment variable");
+            Console.WriteLine("  dotnet run basic   - Use default console logger with environment variable");
             Console.WriteLine("  dotnet run custom  - Use custom logger callback");
-            Console.WriteLine("  dotnet run file    - Use file logger");
+            Console.WriteLine("  dotnet run file    - Use custom file logger (via SetLogger callback)");
         }
     }
 
@@ -44,15 +45,11 @@ class Program
     {
         Console.WriteLine("=== Basic Logging Example ===");
         Console.WriteLine();
+        Console.WriteLine("Note: Starting with iceoryx2 v0.8.0, the console logger is enabled by default.");
+        Console.WriteLine();
 
         // Set log level from environment variable IOX2_LOG_LEVEL (or default to Info)
         Iox2Log.SetLogLevelFromEnvOrDefault();
-
-        // Use the built-in console logger
-        if (Iox2Log.UseConsoleLogger())
-        {
-            Console.WriteLine("Console logger initialized successfully");
-        }
 
         Console.WriteLine($"Current log level: {Iox2Log.GetLogLevel()}");
         Console.WriteLine();
@@ -151,25 +148,57 @@ class Program
 
     static void RunFileLoggerExample()
     {
-        Console.WriteLine("=== File Logger Example ===");
+        Console.WriteLine("=== File Logger Example (via Custom Logger) ===");
+        Console.WriteLine();
+        Console.WriteLine("Note: Starting with iceoryx2 v0.8.0, file logging requires rebuilding");
+        Console.WriteLine("iceoryx2 with specific feature flags. This example demonstrates");
+        Console.WriteLine("implementing file logging using a custom logger callback instead.");
         Console.WriteLine();
 
         var logFile = "/tmp/iceoryx2_csharp.log";
 
-        // Use file logger
-        if (Iox2Log.UseFileLogger(logFile))
+        // Create or truncate the log file
+        using (var writer = new StreamWriter(logFile, append: false))
         {
-            Console.WriteLine($"File logger initialized: {logFile}");
+            writer.WriteLine($"=== iceoryx2 Log File - Started at {DateTime.Now:yyyy-MM-dd HH:mm:ss} ===");
+        }
+
+        // Use a custom logger that writes to file
+        var success = Iox2Log.SetLogger((level, origin, message) =>
+        {
+            var timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+            var levelStr = level.ToString().ToUpper().PadRight(5);
+            var logLine = string.IsNullOrEmpty(origin)
+                ? $"[{timestamp}] [{levelStr}] {message}"
+                : $"[{timestamp}] [{levelStr}] {origin} - {message}";
+
+            // Write to file
+            try
+            {
+                File.AppendAllText(logFile, logLine + Environment.NewLine);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Failed to write to log file: {ex.Message}");
+            }
+
+            // Also write to console for visibility
+            Console.WriteLine(logLine);
+        });
+
+        if (success)
+        {
+            Console.WriteLine($"Custom file logger initialized: {logFile}");
         }
         else
         {
-            Console.WriteLine("Failed to initialize file logger");
+            Console.WriteLine("Failed to set custom logger (may have been set already)");
             return;
         }
 
         // Set log level
         Iox2Log.SetLogLevel(LogLevel.Debug);
-        Console.WriteLine($"Iox2Log level set to: {Iox2Log.GetLogLevel()}");
+        Console.WriteLine($"Log level set to: {Iox2Log.GetLogLevel()}");
         Console.WriteLine();
 
         // Write some log messages
@@ -180,6 +209,7 @@ class Program
         Iox2Log.Write(LogLevel.Error, "FileLogging", "Error message to file");
 
         // Create a node to generate library logs
+        Console.WriteLine();
         Console.WriteLine("Creating iceoryx2 node (logs will be written to file)...");
         var node = NodeBuilder.New()
             .Name("file_logging_example")

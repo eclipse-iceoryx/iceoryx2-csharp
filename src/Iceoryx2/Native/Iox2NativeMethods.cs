@@ -1203,13 +1203,8 @@ internal static partial class Iox2NativeMethods
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
     internal static extern void iox2_log(iox2_log_level_e log_level, IntPtr origin, IntPtr message);
 
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    [return: MarshalAs(UnmanagedType.U1)]
-    internal static extern bool iox2_use_console_logger();
-
-    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    [return: MarshalAs(UnmanagedType.U1)]
-    internal static extern bool iox2_use_file_logger(IntPtr log_file);
+    // Note: iox2_use_console_logger() was removed in iceoryx2 v0.8.0 - console logger is now the default
+    // Note: iox2_use_file_logger() was removed in iceoryx2 v0.8.0 - requires rebuild with --features iceoryx2-loggers/file
 
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
     internal static extern void iox2_set_log_level_from_env_or_default();
