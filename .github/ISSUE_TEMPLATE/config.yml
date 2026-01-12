@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: iceoryx2 Documentation
+    url: https://github.com/eclipse-iceoryx/iceoryx2
+    about: Check the main iceoryx2 documentation for general IPC concepts
+  - name: iceoryx2-csharp Examples
+    url: https://github.com/eclipse-iceoryx2/iceoryx2-csharp/tree/main/examples
+    about: Browse examples for common usage patterns
