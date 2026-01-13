@@ -22,6 +22,10 @@ namespace Iceoryx2.Blackboard;
 /// Only one writer can exist per blackboard service.
 /// </summary>
 /// <typeparam name="TKey">The type of keys in the blackboard.</typeparam>
+/// <remarks>
+/// Thread Safety: This class is not thread-safe. The writer instance should be used from a single thread only.
+/// The underlying blackboard service ensures exclusive write access - only one writer can exist at a time.
+/// </remarks>
 public sealed class Writer<TKey> : IDisposable
     where TKey : unmanaged
 {
@@ -49,7 +53,7 @@ public sealed class Writer<TKey> : IDisposable
 
         var valueTypeName = ServiceBuilder.GetRustCompatibleTypeName<TValue>();
         var valueTypeSize = (ulong)sizeof(TValue);
-        var valueTypeAlignment = GetAlignment<TValue>(valueTypeSize);
+        var valueTypeAlignment = BlackboardHelpers.GetAlignment<TValue>(valueTypeSize);
 
         // Stack allocate - matches how C example passes &key directly
         TKey* keyPtr = stackalloc TKey[1];
@@ -73,26 +77,6 @@ public sealed class Writer<TKey> : IDisposable
 
         return Result<EntryHandleMut<TKey, TValue>, Iox2Error>.Ok(
             new EntryHandleMut<TKey, TValue>(entryHandleMutPtr, key));
-    }
-
-    private static ulong GetAlignment<T>(ulong typeSize) where T : unmanaged
-    {
-        if (typeof(T).IsPrimitive)
-        {
-            return typeSize;
-        }
-        else
-        {
-            var layoutAttr = typeof(T).StructLayoutAttribute;
-            if (layoutAttr != null && layoutAttr.Pack > 0)
-            {
-                return (ulong)layoutAttr.Pack;
-            }
-            else
-            {
-                return (ulong)IntPtr.Size;
-            }
-        }
     }
 
     private void ThrowIfDisposed()

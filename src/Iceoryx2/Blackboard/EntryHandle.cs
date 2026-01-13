@@ -50,48 +50,21 @@ public sealed class EntryHandle<TKey, TValue> : IDisposable
         ThrowIfDisposed();
 
         var valueSize = (ulong)sizeof(TValue);
-        var valueAlignment = GetAlignment<TValue>(valueSize);
+        var valueAlignment = BlackboardHelpers.GetAlignment<TValue>(valueSize);
 
-        // Allocate memory for the value
-        var valuePtr = Marshal.AllocHGlobal(sizeof(TValue));
-        try
-        {
-            var handlePtr = _handle.DangerousGetHandle();
-            // Note: iox2_entry_handle_get returns void
-            iox2_entry_handle_get(
-                ref handlePtr,
-                valuePtr,
-                valueSize,
-                valueAlignment);
+        // Stack allocate for small fixed-size value
+        TValue* valuePtr = stackalloc TValue[1];
 
-            // Use unsafe pointer dereference instead of Marshal.PtrToStructure
-            var value = *(TValue*)valuePtr;
-            return Result<TValue, Iox2Error>.Ok(value);
-        }
-        finally
-        {
-            Marshal.FreeHGlobal(valuePtr);
-        }
-    }
+        var handlePtr = _handle.DangerousGetHandle();
+        // Note: iox2_entry_handle_get returns void
+        iox2_entry_handle_get(
+            ref handlePtr,
+            (IntPtr)valuePtr,
+            valueSize,
+            valueAlignment);
 
-    private static ulong GetAlignment<T>(ulong typeSize) where T : unmanaged
-    {
-        if (typeof(T).IsPrimitive)
-        {
-            return typeSize;
-        }
-        else
-        {
-            var layoutAttr = typeof(T).StructLayoutAttribute;
-            if (layoutAttr != null && layoutAttr.Pack > 0)
-            {
-                return (ulong)layoutAttr.Pack;
-            }
-            else
-            {
-                return (ulong)IntPtr.Size;
-            }
-        }
+        // Use unsafe pointer dereference
+        return Result<TValue, Iox2Error>.Ok(*valuePtr);
     }
 
     private void ThrowIfDisposed()

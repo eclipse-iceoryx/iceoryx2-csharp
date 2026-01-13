@@ -51,29 +51,21 @@ public sealed class EntryHandleMut<TKey, TValue> : IDisposable
         ThrowIfDisposed();
 
         var valueSize = (ulong)sizeof(TValue);
-        var valueAlignment = GetAlignment<TValue>(valueSize);
+        var valueAlignment = BlackboardHelpers.GetAlignment<TValue>(valueSize);
 
-        // Allocate memory for the value
-        var valuePtr = Marshal.AllocHGlobal(sizeof(TValue));
-        try
-        {
-            // Use unsafe pointer dereference instead of Marshal.StructureToPtr
-            *(TValue*)valuePtr = value;
+        // Stack allocate for small fixed-size value
+        TValue* valuePtr = stackalloc TValue[1];
+        *valuePtr = value;
 
-            var handlePtr = _handle.DangerousGetHandle();
-            // Note: iox2_entry_handle_mut_update_with_copy returns void
-            iox2_entry_handle_mut_update_with_copy(
-                ref handlePtr,
-                valuePtr,
-                valueSize,
-                valueAlignment);
+        var handlePtr = _handle.DangerousGetHandle();
+        // Note: iox2_entry_handle_mut_update_with_copy returns void
+        iox2_entry_handle_mut_update_with_copy(
+            ref handlePtr,
+            (IntPtr)valuePtr,
+            valueSize,
+            valueAlignment);
 
-            return Result<Unit, Iox2Error>.Ok(Unit.Default);
-        }
-        finally
-        {
-            Marshal.FreeHGlobal(valuePtr);
-        }
+        return Result<Unit, Iox2Error>.Ok(Unit.Value);
     }
 
     /// <summary>
@@ -86,7 +78,7 @@ public sealed class EntryHandleMut<TKey, TValue> : IDisposable
         ThrowIfDisposed();
 
         var valueSize = (ulong)sizeof(TValue);
-        var valueAlignment = GetAlignment<TValue>(valueSize);
+        var valueAlignment = BlackboardHelpers.GetAlignment<TValue>(valueSize);
 
         var handlePtr = _handle.DangerousGetHandle();
         // Note: iox2_entry_handle_mut_loan_uninit returns void
@@ -104,26 +96,6 @@ public sealed class EntryHandleMut<TKey, TValue> : IDisposable
 
         return Result<EntryValue<TKey, TValue>, Iox2Error>.Ok(
             new EntryValue<TKey, TValue>(entryValueHandle, _key));
-    }
-
-    private static ulong GetAlignment<T>(ulong typeSize) where T : unmanaged
-    {
-        if (typeof(T).IsPrimitive)
-        {
-            return typeSize;
-        }
-        else
-        {
-            var layoutAttr = typeof(T).StructLayoutAttribute;
-            if (layoutAttr != null && layoutAttr.Pack > 0)
-            {
-                return (ulong)layoutAttr.Pack;
-            }
-            else
-            {
-                return (ulong)IntPtr.Size;
-            }
-        }
     }
 
     private void ThrowIfDisposed()
@@ -145,15 +117,4 @@ public sealed class EntryHandleMut<TKey, TValue> : IDisposable
             _disposed = true;
         }
     }
-}
-
-/// <summary>
-/// Represents an empty value type used for operations that don't return a meaningful value.
-/// </summary>
-public readonly struct Unit
-{
-    /// <summary>
-    /// Gets the default Unit instance.
-    /// </summary>
-    public static Unit Default => default;
 }

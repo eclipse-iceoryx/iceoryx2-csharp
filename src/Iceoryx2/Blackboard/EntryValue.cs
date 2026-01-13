@@ -52,6 +52,10 @@ public sealed class EntryValue<TKey, TValue> : IDisposable
         ThrowIfCommitted();
 
         iox2_entry_value_mut(ref _handle, out var payloadPtr);
+        if (payloadPtr == IntPtr.Zero)
+        {
+            throw new InvalidOperationException("Failed to get payload pointer from entry value.");
+        }
         return ref *(TValue*)payloadPtr;
     }
 
@@ -65,6 +69,10 @@ public sealed class EntryValue<TKey, TValue> : IDisposable
         ThrowIfCommitted();
 
         iox2_entry_value_mut(ref _handle, out var payloadPtr);
+        if (payloadPtr == IntPtr.Zero)
+        {
+            throw new InvalidOperationException("Failed to get payload pointer from entry value.");
+        }
         // Use unsafe pointer dereference instead of Marshal.StructureToPtr
         *(TValue*)payloadPtr = value;
     }

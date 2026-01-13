@@ -22,6 +22,10 @@ namespace Iceoryx2.Blackboard;
 /// Multiple readers can exist per blackboard service.
 /// </summary>
 /// <typeparam name="TKey">The type of keys in the blackboard.</typeparam>
+/// <remarks>
+/// Thread Safety: This class is not thread-safe. Each reader instance should be used from a single thread only.
+/// Multiple reader instances can safely access the same blackboard concurrently from different threads.
+/// </remarks>
 public sealed class Reader<TKey> : IDisposable
     where TKey : unmanaged
 {
@@ -49,58 +53,30 @@ public sealed class Reader<TKey> : IDisposable
 
         var valueTypeName = ServiceBuilder.GetRustCompatibleTypeName<TValue>();
         var valueTypeSize = (ulong)sizeof(TValue);
-        var valueTypeAlignment = GetAlignment<TValue>(valueTypeSize);
+        var valueTypeAlignment = BlackboardHelpers.GetAlignment<TValue>(valueTypeSize);
 
-        // Allocate memory for the key
-        var keyPtr = Marshal.AllocHGlobal(sizeof(TKey));
-        try
+        // Stack allocate - matches how Writer passes key directly
+        TKey* keyPtr = stackalloc TKey[1];
+        keyPtr[0] = key;
+
+        var handlePtr = _handle.DangerousGetHandle();
+        var result = iox2_reader_entry(
+            ref handlePtr,
+            IntPtr.Zero,
+            out var entryHandlePtr,
+            (IntPtr)keyPtr,
+            valueTypeName,
+            valueTypeName.Length,
+            valueTypeSize,
+            valueTypeAlignment);
+
+        if (result != IOX2_OK || entryHandlePtr == IntPtr.Zero)
         {
-            // Use unsafe pointer dereference instead of Marshal.StructureToPtr
-            *(TKey*)keyPtr = key;
-
-            var handlePtr = _handle.DangerousGetHandle();
-            var result = iox2_reader_entry(
-                ref handlePtr,
-                IntPtr.Zero,
-                out var entryHandlePtr,
-                keyPtr,
-                valueTypeName,
-                valueTypeName.Length,
-                valueTypeSize,
-                valueTypeAlignment);
-
-            if (result != IOX2_OK || entryHandlePtr == IntPtr.Zero)
-            {
-                return Result<EntryHandle<TKey, TValue>, Iox2Error>.Err(Iox2Error.EntryAccessFailed);
-            }
-
-            return Result<EntryHandle<TKey, TValue>, Iox2Error>.Ok(
-                new EntryHandle<TKey, TValue>(entryHandlePtr, key));
+            return Result<EntryHandle<TKey, TValue>, Iox2Error>.Err(Iox2Error.EntryAccessFailed);
         }
-        finally
-        {
-            Marshal.FreeHGlobal(keyPtr);
-        }
-    }
 
-    private static ulong GetAlignment<T>(ulong typeSize) where T : unmanaged
-    {
-        if (typeof(T).IsPrimitive)
-        {
-            return typeSize;
-        }
-        else
-        {
-            var layoutAttr = typeof(T).StructLayoutAttribute;
-            if (layoutAttr != null && layoutAttr.Pack > 0)
-            {
-                return (ulong)layoutAttr.Pack;
-            }
-            else
-            {
-                return (ulong)IntPtr.Size;
-            }
-        }
+        return Result<EntryHandle<TKey, TValue>, Iox2Error>.Ok(
+            new EntryHandle<TKey, TValue>(entryHandlePtr, key));
     }
 
     private void ThrowIfDisposed()

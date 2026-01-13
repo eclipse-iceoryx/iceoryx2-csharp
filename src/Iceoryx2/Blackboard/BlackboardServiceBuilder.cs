@@ -12,6 +12,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using static Iceoryx2.Native.Iox2NativeMethods;
 
@@ -52,7 +53,11 @@ public sealed class BlackboardEntry<TKey, TValue>
 /// Builder for creating or opening blackboard services.
 /// </summary>
 /// <typeparam name="TKey">The type of keys in the blackboard (must be unmanaged).</typeparam>
-public sealed class BlackboardServiceBuilder<TKey>
+/// <remarks>
+/// Thread Safety: This class is not thread-safe. Instances should not be accessed concurrently from multiple threads.
+/// Each instance should be used from a single thread, or external synchronization must be provided.
+/// </remarks>
+public sealed class BlackboardServiceBuilder<TKey> : IDisposable
     where TKey : unmanaged
 {
     private readonly Node _node;
@@ -60,6 +65,8 @@ public sealed class BlackboardServiceBuilder<TKey>
 
     // Store the delegate to prevent garbage collection
     private iox2_service_blackboard_key_eq_cmp_func? _nativeKeyComparer;
+    private GCHandle _keyComparerHandle;
+    private bool _disposed;
 
     internal BlackboardServiceBuilder(Node node, Func<TKey, TKey, bool> keyComparer)
     {
@@ -72,8 +79,16 @@ public sealed class BlackboardServiceBuilder<TKey>
     /// </summary>
     /// <param name="serviceName">The name of the service.</param>
     /// <returns>A Result containing the blackboard service or an error.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when serviceName is null.</exception>
+    /// <exception cref="ArgumentException">Thrown when serviceName is empty or whitespace.</exception>
     public unsafe Result<BlackboardService<TKey>, Iox2Error> Open(string serviceName)
     {
+        ArgumentNullException.ThrowIfNull(serviceName);
+        if (string.IsNullOrWhiteSpace(serviceName))
+        {
+            throw new ArgumentException("Service name cannot be empty or whitespace.", nameof(serviceName));
+        }
+
         // Create service name
         var serviceNameResult = iox2_service_name_new(
             IntPtr.Zero,
@@ -113,7 +128,7 @@ public sealed class BlackboardServiceBuilder<TKey>
             // Set key type details
             var keyTypeName = ServiceBuilder.GetRustCompatibleTypeName<TKey>();
             var keyTypeSize = (ulong)sizeof(TKey);
-            var keyTypeAlignment = GetAlignment<TKey>(keyTypeSize);
+            var keyTypeAlignment = BlackboardHelpers.GetAlignment<TKey>(keyTypeSize);
 
             var keyResult = iox2_service_builder_blackboard_opener_set_key_type_details(
                 ref blackboardOpenerHandle,
@@ -154,11 +169,27 @@ public sealed class BlackboardServiceBuilder<TKey>
     /// <param name="serviceName">The name of the service.</param>
     /// <param name="entries">The key-value entries to add to the blackboard.</param>
     /// <returns>A Result containing the blackboard service or an error.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when serviceName or entries is null.</exception>
+    /// <exception cref="ArgumentException">Thrown when serviceName is empty/whitespace or entries is empty.</exception>
     public unsafe Result<BlackboardService<TKey>, Iox2Error> Create<TValue>(
         string serviceName,
         IEnumerable<BlackboardEntry<TKey, TValue>> entries)
         where TValue : unmanaged
     {
+        ArgumentNullException.ThrowIfNull(serviceName);
+        ArgumentNullException.ThrowIfNull(entries);
+
+        if (string.IsNullOrWhiteSpace(serviceName))
+        {
+            throw new ArgumentException("Service name cannot be empty or whitespace.", nameof(serviceName));
+        }
+
+        var entryList = entries.ToList();
+        if (entryList.Count == 0)
+        {
+            throw new ArgumentException("At least one entry is required to create a blackboard service.", nameof(entries));
+        }
+
         // Create service name
         var serviceNameResult = iox2_service_name_new(
             IntPtr.Zero,
@@ -198,7 +229,7 @@ public sealed class BlackboardServiceBuilder<TKey>
             // Set key type details
             var keyTypeName = ServiceBuilder.GetRustCompatibleTypeName<TKey>();
             var keyTypeSize = (ulong)sizeof(TKey);
-            var keyTypeAlignment = GetAlignment<TKey>(keyTypeSize);
+            var keyTypeAlignment = BlackboardHelpers.GetAlignment<TKey>(keyTypeSize);
 
             var keyResult = iox2_service_builder_blackboard_creator_set_key_type_details(
                 ref blackboardCreatorHandle,
@@ -214,6 +245,7 @@ public sealed class BlackboardServiceBuilder<TKey>
 
             // Set key comparison function
             _nativeKeyComparer = CreateNativeKeyComparer();
+            _keyComparerHandle = GCHandle.Alloc(_nativeKeyComparer);
             iox2_service_builder_blackboard_creator_set_key_eq_comparison_function(
                 ref blackboardCreatorHandle,
                 _nativeKeyComparer);
@@ -221,14 +253,14 @@ public sealed class BlackboardServiceBuilder<TKey>
             // Add entries - keep memory alive until service is created
             var valueTypeName = ServiceBuilder.GetRustCompatibleTypeName<TValue>();
             var valueTypeSize = (ulong)sizeof(TValue);
-            var valueTypeAlignment = GetAlignment<TValue>(valueTypeSize);
+            var valueTypeAlignment = BlackboardHelpers.GetAlignment<TValue>(valueTypeSize);
 
             // Collect all allocated memory to free after service creation
             var allocatedMemory = new List<IntPtr>();
 
             try
             {
-                foreach (var entry in entries)
+                foreach (var entry in entryList)
                 {
                     // Allocate memory for key and value
                     var keyPtr = Marshal.AllocHGlobal(sizeof(TKey));
@@ -296,23 +328,18 @@ public sealed class BlackboardServiceBuilder<TKey>
         };
     }
 
-    private static ulong GetAlignment<T>(ulong typeSize) where T : unmanaged
+    /// <summary>
+    /// Releases all resources used by the <see cref="BlackboardServiceBuilder{TKey}"/>.
+    /// </summary>
+    public void Dispose()
     {
-        if (typeof(T).IsPrimitive)
+        if (!_disposed)
         {
-            return typeSize;
-        }
-        else
-        {
-            var layoutAttr = typeof(T).StructLayoutAttribute;
-            if (layoutAttr != null && layoutAttr.Pack > 0)
+            if (_keyComparerHandle.IsAllocated)
             {
-                return (ulong)layoutAttr.Pack;
+                _keyComparerHandle.Free();
             }
-            else
-            {
-                return (ulong)IntPtr.Size;
-            }
+            _disposed = true;
         }
     }
 }
