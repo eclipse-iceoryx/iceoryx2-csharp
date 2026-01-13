@@ -72,6 +72,10 @@ public abstract class Iox2Error
             Iox2ErrorKind.WaitSetAttachmentFailed => new WaitSetAttachmentError(details),
             Iox2ErrorKind.WaitSetRunFailed => new WaitSetRunError(details),
             Iox2ErrorKind.ConnectionUpdateFailed => new ConnectionUpdateError(details),
+            Iox2ErrorKind.BlackboardServiceCreationFailed => new BlackboardServiceCreationError(null, details),
+            Iox2ErrorKind.WriterCreationFailed => new WriterCreationError(details),
+            Iox2ErrorKind.ReaderCreationFailed => new ReaderCreationError(details),
+            Iox2ErrorKind.EntryAccessFailed => new EntryAccessError(details),
             Iox2ErrorKind.Unknown => new UnknownError(details),
             _ => new UnknownError(details)
         };
@@ -153,6 +157,18 @@ public abstract class Iox2Error
 
     /// <summary>Gets a <see cref="ConnectionUpdateError"/> instance for backward compatibility.</summary>
     public static Iox2Error ConnectionUpdateFailed => new ConnectionUpdateError();
+
+    /// <summary>Gets a <see cref="BlackboardServiceCreationError"/> instance for backward compatibility.</summary>
+    public static Iox2Error BlackboardServiceCreationFailed => new BlackboardServiceCreationError(null);
+
+    /// <summary>Gets a <see cref="WriterCreationError"/> instance for backward compatibility.</summary>
+    public static Iox2Error WriterCreationFailed => new WriterCreationError();
+
+    /// <summary>Gets a <see cref="ReaderCreationError"/> instance for backward compatibility.</summary>
+    public static Iox2Error ReaderCreationFailed => new ReaderCreationError();
+
+    /// <summary>Gets an <see cref="EntryAccessError"/> instance for backward compatibility.</summary>
+    public static Iox2Error EntryAccessFailed => new EntryAccessError();
 
     /// <summary>Gets an <see cref="UnknownError"/> instance for backward compatibility.</summary>
     public static Iox2Error Unknown => new UnknownError();

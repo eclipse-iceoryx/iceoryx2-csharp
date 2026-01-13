@@ -11,6 +11,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 using System;
+using System.Collections.Generic;
 
 namespace Iceoryx2;
 
@@ -50,6 +51,29 @@ public sealed class ServiceBuilder
         where TResponse : unmanaged
     {
         return new RequestResponse.RequestResponseServiceBuilder<TRequest, TResponse>(_node);
+    }
+
+    /// <summary>
+    /// Creates a blackboard service builder with the specified key comparer.
+    /// </summary>
+    /// <typeparam name="TKey">The type of keys in the blackboard (must be unmanaged).</typeparam>
+    /// <param name="keyComparer">A function to compare two keys for equality.</param>
+    /// <returns>A blackboard service builder.</returns>
+    public Blackboard.BlackboardServiceBuilder<TKey> Blackboard<TKey>(Func<TKey, TKey, bool> keyComparer)
+        where TKey : unmanaged
+    {
+        return new Blackboard.BlackboardServiceBuilder<TKey>(_node, keyComparer);
+    }
+
+    /// <summary>
+    /// Creates a blackboard service builder using the default equality comparer.
+    /// </summary>
+    /// <typeparam name="TKey">The type of keys in the blackboard (must be unmanaged).</typeparam>
+    /// <returns>A blackboard service builder.</returns>
+    public Blackboard.BlackboardServiceBuilder<TKey> Blackboard<TKey>()
+        where TKey : unmanaged
+    {
+        return new Blackboard.BlackboardServiceBuilder<TKey>(_node, EqualityComparer<TKey>.Default.Equals);
     }
 
     /// <summary>
