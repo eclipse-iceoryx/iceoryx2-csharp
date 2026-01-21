@@ -91,20 +91,19 @@ public static class ReaderExtensions
 
         var interval = pollingInterval ?? TimeSpan.FromMilliseconds(10);
 
+        // Retrieve the entry once before the loop since blackboard entries cannot be removed
+        var entryResult = reader.Entry<TValue>(key);
+        if (!entryResult.IsOk)
+        {
+            yield break;
+        }
+
+        using var entry = entryResult.Unwrap();
+
         while (!cancellationToken.IsCancellationRequested)
         {
-            var entryResult = reader.Entry<TValue>(key);
-
-            if (entryResult.IsOk)
-            {
-                using var entry = entryResult.Unwrap();
-                var valueResult = entry.Get();
-
-                if (valueResult.IsOk)
-                {
-                    yield return valueResult.Unwrap();
-                }
-            }
+            var value = entry.Get();
+            yield return value;
 
             await Task.Delay(interval, cancellationToken);
         }
@@ -138,26 +137,24 @@ public static class ReaderExtensions
         var hasLastValue = false;
         TValue lastValue = default;
 
+        // Retrieve the entry once before the loop since blackboard entries cannot be removed
+        var entryResult = reader.Entry<TValue>(key);
+        if (!entryResult.IsOk)
+        {
+            yield break;
+        }
+
+        using var entry = entryResult.Unwrap();
+
         while (!cancellationToken.IsCancellationRequested)
         {
-            var entryResult = reader.Entry<TValue>(key);
+            var currentValue = entry.Get();
 
-            if (entryResult.IsOk)
+            if (!hasLastValue || !comparer.Equals(lastValue, currentValue))
             {
-                using var entry = entryResult.Unwrap();
-                var valueResult = entry.Get();
-
-                if (valueResult.IsOk)
-                {
-                    var currentValue = valueResult.Unwrap();
-
-                    if (!hasLastValue || !comparer.Equals(lastValue, currentValue))
-                    {
-                        lastValue = currentValue;
-                        hasLastValue = true;
-                        yield return currentValue;
-                    }
-                }
+                lastValue = currentValue;
+                hasLastValue = true;
+                yield return currentValue;
             }
 
             await Task.Delay(interval, cancellationToken);

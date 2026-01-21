@@ -53,35 +53,27 @@ internal sealed class ReaderObservable<TKey, TValue> : IObservable<TValue>
         {
             try
             {
+                // Retrieve the entry once before the loop since blackboard entries cannot be removed
+                var entryResult = _reader.Entry<TValue>(_key);
+
+                if (!entryResult.IsOk)
+                {
+                    // On error, notify observer and complete
+                    observer.OnError(new InvalidOperationException("Failed to access blackboard entry"));
+                    return;
+                }
+
+                using var entry = entryResult.Unwrap();
+
                 while (!cts.Token.IsCancellationRequested)
                 {
                     try
                     {
-                        // Try to get the entry and read the value
-                        var entryResult = _reader.Entry<TValue>(_key);
+                        // Get the value directly (no longer returns Result)
+                        var value = entry.Get();
 
-                        if (entryResult.IsOk)
-                        {
-                            using var entry = entryResult.Unwrap();
-                            var valueResult = entry.Get();
-
-                            if (valueResult.IsOk)
-                            {
-                                // Push the value to the observer
-                                observer.OnNext(valueResult.Unwrap());
-                            }
-                            else
-                            {
-                                observer.OnError(new InvalidOperationException("Failed to read blackboard value"));
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            // On error, notify observer and complete
-                            observer.OnError(new InvalidOperationException("Failed to access blackboard entry"));
-                            break;
-                        }
+                        // Push the value to the observer
+                        observer.OnNext(value);
                     }
                     catch (Exception ex)
                     {

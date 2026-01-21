@@ -44,8 +44,8 @@ public sealed class EntryHandle<TKey, TValue> : IDisposable
     /// <summary>
     /// Gets the current value from the blackboard entry.
     /// </summary>
-    /// <returns>A Result containing the current value or an error.</returns>
-    public unsafe Result<TValue, Iox2Error> Get()
+    /// <returns>The current value.</returns>
+    public unsafe TValue Get()
     {
         ThrowIfDisposed();
 
@@ -61,10 +61,11 @@ public sealed class EntryHandle<TKey, TValue> : IDisposable
             ref handlePtr,
             (IntPtr)valuePtr,
             valueSize,
-            valueAlignment);
+            valueAlignment,
+            IntPtr.Zero);
 
         // Use unsafe pointer dereference
-        return Result<TValue, Iox2Error>.Ok(*valuePtr);
+        return *valuePtr;
     }
 
     private void ThrowIfDisposed()

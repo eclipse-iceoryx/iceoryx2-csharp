@@ -603,7 +603,7 @@ var subscriber = service.CreateSubscriberBuilder()
 ### Configuration Best Practices
 
 | Setting | Low Memory | High Throughput | Reliability |
-|---------|------------|-----------------|-------------|
+| ------- | ---------- | --------------- | ----------- |
 | `SubscriberMaxBufferSize` | 1-2 | 10+ | 5+ |
 | `HistorySize` | 0 | 0 | 5+ |
 | `MaxLoanedSamples` | 1 | 4+ | 2 |

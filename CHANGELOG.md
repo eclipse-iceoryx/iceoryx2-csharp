@@ -55,7 +55,7 @@ Based on iceoryx2 v0.8.0
 - **Service Discovery**
   - Service discovery APIs for runtime service enumeration
 
-- **Reactive Extensions** (`Iceoryx2.Reactive`)
+- **Reactive Extensions** (`iceoryx2.Reactive`)
   - `IObservable<T>` integration for reactive programming
   - `ObservableWaitSet` for reactive event handling
 

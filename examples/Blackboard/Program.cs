@@ -140,11 +140,8 @@ class Program
                         Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                         Quality = 100
                     };
-                    var updateResult = entry.Update(data);
-                    if (updateResult.IsOk)
-                    {
-                        Console.WriteLine($"[{iteration}] Temperature: {data.Value:F2}C");
-                    }
+                    entry.UpdateWithCopy(data);
+                    Console.WriteLine($"[{iteration}] Temperature: {data.Value:F2}C");
                 }
             }
 
@@ -160,11 +157,8 @@ class Program
                         Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                         Quality = 95
                     };
-                    var updateResult = entry.Update(data);
-                    if (updateResult.IsOk)
-                    {
-                        Console.WriteLine($"[{iteration}] Humidity: {data.Value:F2}%");
-                    }
+                    entry.UpdateWithCopy(data);
+                    Console.WriteLine($"[{iteration}] Humidity: {data.Value:F2}%");
                 }
             }
 
@@ -180,11 +174,8 @@ class Program
                         Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                         Quality = 98
                     };
-                    var updateResult = entry.Update(data);
-                    if (updateResult.IsOk)
-                    {
-                        Console.WriteLine($"[{iteration}] Pressure: {data.Value:F2} hPa");
-                    }
+                    entry.UpdateWithCopy(data);
+                    Console.WriteLine($"[{iteration}] Pressure: {data.Value:F2} hPa");
                 }
             }
 
@@ -253,12 +244,8 @@ class Program
                 if (entryResult.IsOk)
                 {
                     using var entry = entryResult.Unwrap();
-                    var valueResult = entry.Get();
-                    if (valueResult.IsOk)
-                    {
-                        var data = valueResult.Unwrap();
-                        Console.WriteLine($"  Temperature: {data.Value:F2}C (quality: {data.Quality})");
-                    }
+                    var data = entry.Get();
+                    Console.WriteLine($"  Temperature: {data.Value:F2}C (quality: {data.Quality})");
                 }
             }
 
@@ -268,12 +255,8 @@ class Program
                 if (entryResult.IsOk)
                 {
                     using var entry = entryResult.Unwrap();
-                    var valueResult = entry.Get();
-                    if (valueResult.IsOk)
-                    {
-                        var data = valueResult.Unwrap();
-                        Console.WriteLine($"  Humidity: {data.Value:F2}% (quality: {data.Quality})");
-                    }
+                    var data = entry.Get();
+                    Console.WriteLine($"  Humidity: {data.Value:F2}% (quality: {data.Quality})");
                 }
             }
 
@@ -283,12 +266,8 @@ class Program
                 if (entryResult.IsOk)
                 {
                     using var entry = entryResult.Unwrap();
-                    var valueResult = entry.Get();
-                    if (valueResult.IsOk)
-                    {
-                        var data = valueResult.Unwrap();
-                        Console.WriteLine($"  Pressure: {data.Value:F2} hPa (quality: {data.Quality})");
-                    }
+                    var data = entry.Get();
+                    Console.WriteLine($"  Pressure: {data.Value:F2} hPa (quality: {data.Quality})");
                 }
             }
 

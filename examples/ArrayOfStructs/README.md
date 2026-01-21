@@ -11,7 +11,8 @@ transmit collections of structured data without serialization overhead.
 
 The example demonstrates:
 
-1. **Custom Struct Definition**: How to define C# structs for IPC with proper memory layout
+1. **Custom Struct Definition**: How to define C# structs for IPC with proper
+   memory layout
 2. **Array/Slice Publishing**: Sending variable-length arrays of structs via `LoanSlice()`
 3. **Zero-Copy Transfer**: No serialization - direct memory mapping between processes
 4. **Multiple Data Types**: Examples with both particle simulation and sensor data
@@ -50,6 +51,7 @@ Instead of serializing arrays, iceoryx2 uses shared memory:
 4. **Receive**: Access array directly in shared memory
 
 **Benefits:**
+
 * No serialization/deserialization overhead
 * Efficient for large arrays
 * Predictable latency
@@ -70,7 +72,7 @@ dotnet build
 
 Demonstrates sending arrays of particle data (physics simulation style).
 
-**Terminal 1: Start Subscriber**
+#### Terminal 1: Start Subscriber
 
 ```bash
 dotnet run --framework net9.0 -- subscriber particle
@@ -93,7 +95,7 @@ Output:
 Waiting for data...
 ```
 
-**Terminal 2: Start Publisher**
+#### Terminal 2: Start Publisher
 
 ```bash
 dotnet run --framework net9.0 -- publisher particle
@@ -134,13 +136,13 @@ Press Ctrl+C to stop.
 
 Demonstrates sending arrays of sensor readings with timestamps.
 
-**Terminal 1: Start Subscriber**
+#### Terminal 1: Start Subscriber
 
 ```bash
 dotnet run --framework net9.0 -- subscriber sensor
 ```
 
-**Terminal 2: Start Publisher**
+#### Terminal 2: Start Publisher
 
 ```bash
 dotnet run --framework net9.0 -- publisher sensor

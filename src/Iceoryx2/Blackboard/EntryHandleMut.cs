@@ -45,8 +45,7 @@ public sealed class EntryHandleMut<TKey, TValue> : IDisposable
     /// Updates the entry value by copying the provided value.
     /// </summary>
     /// <param name="value">The new value to set.</param>
-    /// <returns>A Result indicating success or an error.</returns>
-    public unsafe Result<Unit, Iox2Error> Update(TValue value)
+    public unsafe void UpdateWithCopy(TValue value)
     {
         ThrowIfDisposed();
 
@@ -64,8 +63,6 @@ public sealed class EntryHandleMut<TKey, TValue> : IDisposable
             (IntPtr)valuePtr,
             valueSize,
             valueAlignment);
-
-        return Result<Unit, Iox2Error>.Ok(Unit.Value);
     }
 
     /// <summary>
@@ -73,7 +70,7 @@ public sealed class EntryHandleMut<TKey, TValue> : IDisposable
     /// This is useful when you want to construct the value directly in shared memory.
     /// </summary>
     /// <returns>A Result containing the loaned entry value or an error.</returns>
-    public unsafe Result<EntryValue<TKey, TValue>, Iox2Error> LoanUninit()
+    public unsafe Result<EntryValueUninit<TKey, TValue>, Iox2Error> LoanUninit()
     {
         ThrowIfDisposed();
 
@@ -91,11 +88,11 @@ public sealed class EntryHandleMut<TKey, TValue> : IDisposable
 
         if (entryValueHandle == IntPtr.Zero)
         {
-            return Result<EntryValue<TKey, TValue>, Iox2Error>.Err(Iox2Error.EntryAccessFailed);
+            return Result<EntryValueUninit<TKey, TValue>, Iox2Error>.Err(Iox2Error.EntryAccessFailed);
         }
 
-        return Result<EntryValue<TKey, TValue>, Iox2Error>.Ok(
-            new EntryValue<TKey, TValue>(entryValueHandle, _key));
+        return Result<EntryValueUninit<TKey, TValue>, Iox2Error>.Ok(
+            new EntryValueUninit<TKey, TValue>(entryValueHandle, _key));
     }
 
     private void ThrowIfDisposed()

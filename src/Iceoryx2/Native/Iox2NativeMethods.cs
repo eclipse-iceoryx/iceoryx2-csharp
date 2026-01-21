@@ -1720,5 +1720,6 @@ internal static partial class Iox2NativeMethods
         ref IntPtr entry_handle,
         IntPtr value_ptr,
         ulong value_size,
-        ulong value_alignment);
+        ulong value_alignment,
+        IntPtr generation_counter_ptr);
 }

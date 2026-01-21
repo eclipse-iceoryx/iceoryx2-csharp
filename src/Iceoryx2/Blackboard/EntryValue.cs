@@ -11,29 +11,28 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 using System;
-using System.Runtime.InteropServices;
+using Iceoryx2.SafeHandles;
 using static Iceoryx2.Native.Iox2NativeMethods;
 
 namespace Iceoryx2.Blackboard;
 
 /// <summary>
-/// Represents a loaned entry value that can be written to and then committed to the blackboard.
+/// Represents a loaned uninitialized entry value that can be written to and then committed to the blackboard.
 /// This is useful for in-place construction of values in shared memory.
 /// </summary>
 /// <typeparam name="TKey">The type of the key.</typeparam>
 /// <typeparam name="TValue">The type of the value.</typeparam>
-public sealed class EntryValue<TKey, TValue> : IDisposable
+public sealed class EntryValueUninit<TKey, TValue> : IDisposable
     where TKey : unmanaged
     where TValue : unmanaged
 {
-    private IntPtr _handle;
+    private readonly SafeEntryValueHandle _handle;
     private readonly TKey _key;
     private bool _disposed;
-    private bool _committed;
 
-    internal EntryValue(IntPtr handle, TKey key)
+    internal EntryValueUninit(IntPtr handle, TKey key)
     {
-        _handle = handle;
+        _handle = new SafeEntryValueHandle(handle);
         _key = key;
     }
 
@@ -43,15 +42,15 @@ public sealed class EntryValue<TKey, TValue> : IDisposable
     public TKey Key => _key;
 
     /// <summary>
-    /// Gets a mutable reference to the payload for in-place modification.
+    /// Gets a mutable reference to the value for in-place modification.
     /// </summary>
-    /// <returns>A reference to the payload.</returns>
-    public unsafe ref TValue PayloadMut()
+    /// <returns>A reference to the value.</returns>
+    public unsafe ref TValue ValueMut()
     {
         ThrowIfDisposed();
-        ThrowIfCommitted();
 
-        iox2_entry_value_mut(ref _handle, out var payloadPtr);
+        var handlePtr = _handle.DangerousGetHandle();
+        iox2_entry_value_mut(ref handlePtr, out var payloadPtr);
         if (payloadPtr == IntPtr.Zero)
         {
             throw new InvalidOperationException("Failed to get payload pointer from entry value.");
@@ -60,15 +59,15 @@ public sealed class EntryValue<TKey, TValue> : IDisposable
     }
 
     /// <summary>
-    /// Writes a value to the loaned memory.
+    /// Updates the entry value by copying the provided value to the loaned memory.
     /// </summary>
     /// <param name="value">The value to write.</param>
-    public unsafe void Write(TValue value)
+    public unsafe void UpdateWithCopy(TValue value)
     {
         ThrowIfDisposed();
-        ThrowIfCommitted();
 
-        iox2_entry_value_mut(ref _handle, out var payloadPtr);
+        var handlePtr = _handle.DangerousGetHandle();
+        iox2_entry_value_mut(ref handlePtr, out var payloadPtr);
         if (payloadPtr == IntPtr.Zero)
         {
             throw new InvalidOperationException("Failed to get payload pointer from entry value.");
@@ -85,16 +84,15 @@ public sealed class EntryValue<TKey, TValue> : IDisposable
     public Result<EntryHandleMut<TKey, TValue>, Iox2Error> Update()
     {
         ThrowIfDisposed();
-        ThrowIfCommitted();
+
+        // Consume the handle - this marks it as invalid so ReleaseHandle won't be called
+        var rawHandle = _handle.Consume();
 
         // Note: iox2_entry_value_update returns void
         iox2_entry_value_update(
-            _handle,
+            rawHandle,
             IntPtr.Zero,
             out var entryHandleMutPtr);
-
-        _committed = true;
-        _handle = IntPtr.Zero; // Handle is consumed by update
 
         if (entryHandleMutPtr == IntPtr.Zero)
         {
@@ -107,32 +105,21 @@ public sealed class EntryValue<TKey, TValue> : IDisposable
 
     private void ThrowIfDisposed()
     {
-        if (_disposed)
+        if (_disposed || _handle.IsInvalid)
         {
-            throw new ObjectDisposedException(nameof(EntryValue<TKey, TValue>));
-        }
-    }
-
-    private void ThrowIfCommitted()
-    {
-        if (_committed)
-        {
-            throw new InvalidOperationException("Entry value has already been committed.");
+            throw new ObjectDisposedException(nameof(EntryValueUninit<TKey, TValue>));
         }
     }
 
     /// <summary>
-    /// Releases all resources used by the <see cref="EntryValue{TKey, TValue}"/>.
+    /// Releases all resources used by the <see cref="EntryValueUninit{TKey, TValue}"/>.
     /// If the entry value has not been committed, it will be dropped without updating the blackboard.
     /// </summary>
     public void Dispose()
     {
         if (!_disposed)
         {
-            if (!_committed && _handle != IntPtr.Zero)
-            {
-                iox2_entry_value_drop(_handle);
-            }
+            _handle.Dispose();
             _disposed = true;
         }
     }

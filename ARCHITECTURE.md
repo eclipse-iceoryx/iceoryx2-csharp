@@ -65,7 +65,7 @@ var service = node.ServiceBuilder()
 iceoryx2 supports three messaging patterns:
 
 | Pattern | Endpoints | Data Flow | Use Case |
-|---------|-----------|-----------|----------|
+| ------- | --------- | --------- | -------- |
 | **Publish-Subscribe** | Publishers → Subscribers | many-to-many | Sensor data, events |
 | **Event** | Notifiers → Listeners | One-to-many (IDs only) | Wake-up signals |
 | **Request-Response** | Clients ↔ Servers | Many-to-many | RPC, commands |
@@ -123,7 +123,7 @@ public struct InvalidData
 When communicating with Rust or C applications, ensure memory layout matches:
 
 | C# | Rust | C |
-|----|------|---|
+| -- | ---- | - |
 | `[StructLayout(LayoutKind.Sequential)]` | `#[repr(C)]` | Default struct |
 | `int` | `i32` | `int32_t` |
 | `uint` | `u32` | `uint32_t` |

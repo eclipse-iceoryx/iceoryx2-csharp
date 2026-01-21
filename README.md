@@ -39,7 +39,8 @@ and provide idiomatic C# APIs with full memory safety.
 * 🧹 **Memory-safe** - Automatic resource management via SafeHandle and IDisposable
 * 🎯 **Idiomatic C#** - Builder pattern, Result types, LINQ-friendly APIs
 * 🔧 **Cross-platform** - Works on Linux, macOS, and Windows
-* 📦 **Multiple patterns** - Publish-Subscribe, Event, Request-Response, and Blackboard communication
+* 📦 **Multiple patterns** - Publish-Subscribe, Event, Request-Response,
+  and Blackboard communication
 * ⚡ **Async/Await** - Full async support with CancellationToken for modern C# applications
 * 🔍 **Service Discovery** - Dynamically discover and monitor running services
 * 🌐 **Domain Isolation** - Separate communication groups for multi-tenant deployments
@@ -59,8 +60,8 @@ iceoryx2 uses **shared memory** for true zero-copy communication:
 │  ┌──────────────────────────────────────────────────────────┐   │
 │  │                    Data Payload                          │   │
 │  └──────────────────────────────────────────────────────────┘   │
-│          ↑                                    ↑                  │
-│          │ Direct Write                       │ Direct Read      │
+│          ↑                                    ↑                 │
+│          │ Direct Write                       │ Direct Read     │
 │    ┌─────┴──────┐                      ┌─────┴──────┐           │
 │    │ Publisher  │                      │ Subscriber │           │
 │    │ (Process A)│                      │ (Process B)│           │
@@ -81,7 +82,7 @@ iceoryx2 organizes communication through **services**. Each service has a unique
 name and supports one of four communication patterns:
 
 | Pattern | Description | Use Case |
-|---------|-------------|----------|
+| ------- | ----------- | -------- |
 | **Publish-Subscribe** | Many-to-many data distribution | Sensor data, telemetry, state broadcasts |
 | **Event** | Lightweight notifications with event IDs | Wake-up signals, state changes, triggers |
 | **Request-Response** | Client-server RPC | Commands, queries, configuration updates |
