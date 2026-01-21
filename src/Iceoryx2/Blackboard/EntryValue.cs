@@ -10,8 +10,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-using System;
 using Iceoryx2.SafeHandles;
+using System;
 using static Iceoryx2.Native.Iox2NativeMethods;
 
 namespace Iceoryx2.Blackboard;
