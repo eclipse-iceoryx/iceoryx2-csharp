@@ -16,22 +16,22 @@ using static Iceoryx2.Native.Iox2NativeMethods;
 namespace Iceoryx2.SafeHandles;
 
 /// <summary>
-/// Safe handle for blackboard entry value (uninit) resources.
+/// Safe handle for blackboard entry value uninit resources.
 /// Ensures proper cleanup of native resources when disposed.
 /// </summary>
-internal sealed class SafeEntryValueHandle : SafeIox2Handle
+internal sealed class SafeEntryValueUninitHandle : SafeIox2Handle
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="SafeEntryValueHandle"/> class.
+    /// Initializes a new instance of the <see cref="SafeEntryValueUninitHandle"/> class.
     /// </summary>
-    public SafeEntryValueHandle() : base()
+    public SafeEntryValueUninitHandle() : base()
     {
     }
 
     /// <summary>
     /// Initializes a new instance with the specified handle.
     /// </summary>
-    public SafeEntryValueHandle(IntPtr handle) : base(handle)
+    public SafeEntryValueUninitHandle(IntPtr handle) : base(handle)
     {
     }
 
@@ -49,14 +49,14 @@ internal sealed class SafeEntryValueHandle : SafeIox2Handle
     }
 
     /// <summary>
-    /// Releases the native entry value handle.
+    /// Releases the native entry value uninit handle.
     /// </summary>
     /// <returns>true if the handle was released successfully; otherwise, false.</returns>
     protected override bool ReleaseHandle()
     {
         if (!IsInvalid)
         {
-            iox2_entry_value_drop(handle);
+            iox2_entry_value_uninit_drop(handle);
         }
         return true;
     }

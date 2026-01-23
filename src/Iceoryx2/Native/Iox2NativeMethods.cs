@@ -1639,14 +1639,14 @@ internal static partial class Iox2NativeMethods
         ulong value_alignment);
 
     // ========================================
-    // Entry Value API (for loan-based updates)
+    // Entry Value Uninit API (for loan-based updates)
     // ========================================
 
     /// <summary>
-    /// Gets a mutable pointer to the entry value's payload.
+    /// Gets a mutable pointer to the entry value uninit's payload.
     /// </summary>
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    internal static extern void iox2_entry_value_mut(
+    internal static extern void iox2_entry_value_uninit_value_mut(
         ref IntPtr entry_value_handle,
         out IntPtr payload_ptr);
 
@@ -1654,16 +1654,16 @@ internal static partial class Iox2NativeMethods
     /// Updates the entry with the loaned value.
     /// </summary>
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    internal static extern void iox2_entry_value_update(
+    internal static extern void iox2_entry_value_uninit_update(
         IntPtr entry_value_handle,
         IntPtr entry_handle_struct_ptr,
         out IntPtr entry_handle_mut);
 
     /// <summary>
-    /// Drops the entry value handle without updating.
+    /// Drops the entry value uninit handle without updating.
     /// </summary>
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
-    internal static extern void iox2_entry_value_drop(IntPtr entry_value_handle);
+    internal static extern void iox2_entry_value_uninit_drop(IntPtr entry_value_handle);
 
     // ========================================
     // Reader Builder API

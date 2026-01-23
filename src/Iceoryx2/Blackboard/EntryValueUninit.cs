@@ -26,13 +26,13 @@ public sealed class EntryValueUninit<TKey, TValue> : IDisposable
     where TKey : unmanaged
     where TValue : unmanaged
 {
-    private readonly SafeEntryValueHandle _handle;
+    private readonly SafeEntryValueUninitHandle _handle;
     private readonly TKey _key;
     private bool _disposed;
 
     internal EntryValueUninit(IntPtr handle, TKey key)
     {
-        _handle = new SafeEntryValueHandle(handle);
+        _handle = new SafeEntryValueUninitHandle(handle);
         _key = key;
     }
 
@@ -50,7 +50,7 @@ public sealed class EntryValueUninit<TKey, TValue> : IDisposable
         ThrowIfDisposed();
 
         var handlePtr = _handle.DangerousGetHandle();
-        iox2_entry_value_mut(ref handlePtr, out var payloadPtr);
+        iox2_entry_value_uninit_value_mut(ref handlePtr, out var payloadPtr);
         if (payloadPtr == IntPtr.Zero)
         {
             throw new InvalidOperationException("Failed to get payload pointer from entry value.");
@@ -67,7 +67,7 @@ public sealed class EntryValueUninit<TKey, TValue> : IDisposable
         ThrowIfDisposed();
 
         var handlePtr = _handle.DangerousGetHandle();
-        iox2_entry_value_mut(ref handlePtr, out var payloadPtr);
+        iox2_entry_value_uninit_value_mut(ref handlePtr, out var payloadPtr);
         if (payloadPtr == IntPtr.Zero)
         {
             throw new InvalidOperationException("Failed to get payload pointer from entry value.");
@@ -88,8 +88,8 @@ public sealed class EntryValueUninit<TKey, TValue> : IDisposable
         // Consume the handle - this marks it as invalid so ReleaseHandle won't be called
         var rawHandle = _handle.Consume();
 
-        // Note: iox2_entry_value_update returns void
-        iox2_entry_value_update(
+        // Note: iox2_entry_value_uninit_update returns void
+        iox2_entry_value_uninit_update(
             rawHandle,
             IntPtr.Zero,
             out var entryHandleMutPtr);
