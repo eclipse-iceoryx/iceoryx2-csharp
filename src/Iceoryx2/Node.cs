@@ -20,6 +20,27 @@ using System.Text;
 namespace Iceoryx2;
 
 /// <summary>
+/// Represents the result of a node wait operation.
+/// </summary>
+public enum NodeWaitResult
+{
+    /// <summary>
+    /// The wait completed successfully after the specified cycle time.
+    /// </summary>
+    Ok,
+
+    /// <summary>
+    /// The wait was interrupted by a signal.
+    /// </summary>
+    Interrupt,
+
+    /// <summary>
+    /// A termination request was received.
+    /// </summary>
+    TerminationRequest
+}
+
+/// <summary>
 /// Represents a node in the Iceoryx2 system.
 /// The node serves as a central entry point and is linked to a specific process within the Iceoryx2 ecosystem.
 /// It provides capabilities for creating or opening services and managing node-specific resources.
@@ -110,6 +131,36 @@ public sealed class Node : IDisposable
     {
         ThrowIfDisposed();
         return new ServiceBuilder(this);
+    }
+
+    /// <summary>
+    /// Waits for the specified duration while handling system signals properly.
+    /// This is the recommended way to wait in a loop instead of Thread.Sleep.
+    /// </summary>
+    /// <param name="cycleTime">The duration to wait.</param>
+    /// <returns>A result indicating whether the wait completed successfully or was interrupted.</returns>
+    public NodeWaitResult Wait(TimeSpan cycleTime)
+    {
+        ThrowIfDisposed();
+
+        var seconds = (ulong)cycleTime.TotalSeconds;
+        var nanoseconds = (uint)((cycleTime.TotalSeconds - seconds) * 1_000_000_000);
+
+        var nodeHandle = _handle.DangerousGetHandle();
+        var result = Iox2NativeMethods.iox2_node_wait(ref nodeHandle, seconds, nanoseconds);
+
+        if (result == Iox2NativeMethods.IOX2_OK)
+        {
+            return NodeWaitResult.Ok;
+        }
+
+        var errorCode = (Iox2NativeMethods.iox2_node_wait_failure_e)result;
+        return errorCode switch
+        {
+            Iox2NativeMethods.iox2_node_wait_failure_e.INTERRUPT => NodeWaitResult.Interrupt,
+            Iox2NativeMethods.iox2_node_wait_failure_e.TERMINATION_REQUEST => NodeWaitResult.TerminationRequest,
+            _ => NodeWaitResult.Interrupt
+        };
     }
 
     /// <summary>

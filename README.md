@@ -14,6 +14,7 @@ C# / .NET bindings for iceoryx2 - Zero-Copy Lock-Free IPC
 * ✅ **Event API** - Complete notifier/listener implementation with
   blocking/timed waits
 * ✅ **Request-Response API** - Complete client/server RPC with verified FFI signatures
+* ✅ **Blackboard API** - Key-value store pattern for shared state monitoring
 * ✅ **Complex Data Types** - Full support for custom structs with sequential layout
 * ✅ **Async/Await Support** - Modern async methods for all blocking operations
   with CancellationToken
@@ -38,7 +39,8 @@ and provide idiomatic C# APIs with full memory safety.
 * 🧹 **Memory-safe** - Automatic resource management via SafeHandle and IDisposable
 * 🎯 **Idiomatic C#** - Builder pattern, Result types, LINQ-friendly APIs
 * 🔧 **Cross-platform** - Works on Linux, macOS, and Windows
-* 📦 **Multiple patterns** - Publish-Subscribe, Event, and Request-Response communication
+* 📦 **Multiple patterns** - Publish-Subscribe, Event, Request-Response,
+  and Blackboard communication
 * ⚡ **Async/Await** - Full async support with CancellationToken for modern C# applications
 * 🔍 **Service Discovery** - Dynamically discover and monitor running services
 * 🌐 **Domain Isolation** - Separate communication groups for multi-tenant deployments
@@ -58,8 +60,8 @@ iceoryx2 uses **shared memory** for true zero-copy communication:
 │  ┌──────────────────────────────────────────────────────────┐   │
 │  │                    Data Payload                          │   │
 │  └──────────────────────────────────────────────────────────┘   │
-│          ↑                                    ↑                  │
-│          │ Direct Write                       │ Direct Read      │
+│          ↑                                    ↑                 │
+│          │ Direct Write                       │ Direct Read     │
 │    ┌─────┴──────┐                      ┌─────┴──────┐           │
 │    │ Publisher  │                      │ Subscriber │           │
 │    │ (Process A)│                      │ (Process B)│           │
@@ -77,13 +79,14 @@ iceoryx2 uses **shared memory** for true zero-copy communication:
 ### Services and Communication Patterns
 
 iceoryx2 organizes communication through **services**. Each service has a unique
-name and supports one of three communication patterns:
+name and supports one of four communication patterns:
 
 | Pattern | Description | Use Case |
-|---------|-------------|----------|
+| ------- | ----------- | -------- |
 | **Publish-Subscribe** | Many-to-many data distribution | Sensor data, telemetry, state broadcasts |
 | **Event** | Lightweight notifications with event IDs | Wake-up signals, state changes, triggers |
 | **Request-Response** | Client-server RPC | Commands, queries, configuration updates |
+| **Blackboard** | Shared key-value store with latest values | State monitoring, configuration sharing, sensor fusion |
 
 ### Nodes
 
@@ -331,6 +334,18 @@ cd examples/Event
 dotnet run -- listener
 ```
 
+**Blackboard Example:**
+
+```bash
+# Terminal 1 - Run creator
+cd examples/Blackboard
+dotnet run -- creator
+
+# Terminal 2 - Run opener
+cd examples/Blackboard
+dotnet run -- opener
+```
+
 ### Alternative: Use the Build Script
 
 A convenience build script is provided that handles all steps:
@@ -371,6 +386,7 @@ iceoryx2-csharp/
 │   │   ├── PublishSubscribe/            # Pub/Sub messaging pattern
 │   │   ├── Event/                       # Event-based communication
 │   │   ├── RequestResponse/             # Request-Response (RPC) pattern
+│   │   ├── Blackboard/                  # Blackboard key-value store pattern
 │   │   └── Types/                       # Common types and utilities
 │   └── Iceoryx2.Reactive/              # Reactive Extensions support
 ├── examples/                            # C# examples
@@ -378,6 +394,7 @@ iceoryx2-csharp/
 │   ├── ComplexDataTypes/               # Complex struct example
 │   ├── Event/                          # Event API example
 │   ├── RequestResponse/                # Request-Response RPC example
+│   ├── Blackboard/                     # Blackboard key-value store example
 │   ├── AsyncPubSub/                    # Async/await patterns example
 │   ├── WaitSetMultiplexing/            # Event multiplexing with WaitSet
 │   └── ServiceDiscovery/               # Service discovery and monitoring

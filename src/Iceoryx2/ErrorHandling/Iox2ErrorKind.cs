@@ -69,6 +69,14 @@ namespace Iceoryx2.ErrorHandling
         ConnectionUpdateFailed,
         /// <summary>Service discovery failed.</summary>
         ServiceListFailed,
+        /// <summary>Blackboard service creation failed.</summary>
+        BlackboardServiceCreationFailed,
+        /// <summary>Blackboard writer creation failed.</summary>
+        WriterCreationFailed,
+        /// <summary>Blackboard reader creation failed.</summary>
+        ReaderCreationFailed,
+        /// <summary>Blackboard entry access failed.</summary>
+        EntryAccessFailed,
         /// <summary>Unknown error.</summary>
         Unknown
     }
