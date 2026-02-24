@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Features
 
-<!-- New features go here -->
+- Add Eclipse Dash license check script and DEPENDENCIES file for NuGet dependency compliance
 
 ### Bugfixes
 

@@ -44,3 +44,6 @@ runtimes/
 
 # github action act artifact files
 .artifacts/
+
+# Dash license tool
+tools/
