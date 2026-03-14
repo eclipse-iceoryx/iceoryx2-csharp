@@ -18,7 +18,7 @@ jobs:
           - os: ubuntu-latest
             artifact-name: linux-x64
             lib-name: libiceoryx2_ffi_c.so
-          - os: macos-14
+          - os: macos-latest
             artifact-name: osx-x64
             lib-name: libiceoryx2_ffi_c.dylib
           - os: windows-latest
