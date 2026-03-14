@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Features
 
-- Add Eclipse Dash license check script and DEPENDENCIES file for NuGet dependency compliance
+* Add Eclipse Dash license check script and DEPENDENCIES file for NuGet dependency compliance
+  [#17](https://github.com/eclipse-iceoryx/iceoryx2-csharp/issues/17)
 
 ### Bugfixes
 

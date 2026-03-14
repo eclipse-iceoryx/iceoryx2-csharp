@@ -1,12 +1,12 @@
-nuget/nuget/-/Newtonsoft.Json/13.0.1, MIT AND BSD-3-Clause, approved, #3266
+nuget/nuget/-/Newtonsoft.Json/13.0.3, MIT AND BSD-3-Clause, approved, #3266
 nuget/nuget/-/Serilog.Extensions.Logging/9.0.0, Apache-2.0, approved, #19180
 nuget/nuget/-/Serilog.Sinks.Console/6.0.0, Apache-2.0, approved, #17054
 nuget/nuget/-/Serilog/4.2.0, Apache-2.0, approved, #17774
 nuget/nuget/-/xunit.abstractions/2.0.3, Apache-2.0 AND MIT, approved, #25268
-nuget/nuget/-/xunit.analyzers/1.6.0, Apache-2.0, restricted, clearlydefined
-nuget/nuget/-/xunit.assert/2.6.2, Apache-2.0, restricted, clearlydefined
-nuget/nuget/-/xunit.core/2.6.2, Apache-2.0, restricted, clearlydefined
-nuget/nuget/-/xunit.extensibility.core/2.6.2, Apache-2.0, restricted, clearlydefined
-nuget/nuget/-/xunit.extensibility.execution/2.6.2, Apache-2.0, restricted, clearlydefined
-nuget/nuget/-/xunit.runner.visualstudio/2.5.4, Apache-2.0 AND MIT, approved, #10065
-nuget/nuget/-/xunit/2.6.2, Apache-2.0, restricted, clearlydefined
+nuget/nuget/-/xunit.analyzers/1.18.0, Apache-2.0 AND MIT, approved, #19066
+nuget/nuget/-/xunit.assert/2.9.3, Apache-2.0, approved, #16331
+nuget/nuget/-/xunit.core/2.9.3, Apache-2.0, approved, #16330
+nuget/nuget/-/xunit.extensibility.core/2.9.3, Apache-2.0 AND MIT, approved, #16334
+nuget/nuget/-/xunit.extensibility.execution/2.9.3, Apache-2.0 AND MIT, approved, #16333
+nuget/nuget/-/xunit.runner.visualstudio/2.8.2, Apache-2.0 AND MIT, approved, #15181
+nuget/nuget/-/xunit/2.9.3, Apache-2.0 AND MIT, approved, #16327
