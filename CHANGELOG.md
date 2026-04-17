@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Features
 
+* Add .NET 10 support across all projects, tests, examples, and CI
+  [#14](https://github.com/eclipse-iceoryx/iceoryx2-csharp/issues/14)
 * Add Eclipse Dash license check script and DEPENDENCIES file for NuGet dependency compliance
   [#17](https://github.com/eclipse-iceoryx/iceoryx2-csharp/issues/17)
 
