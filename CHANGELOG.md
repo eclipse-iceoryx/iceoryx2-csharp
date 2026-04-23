@@ -16,7 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Bugfixes
 
-<!-- Bug fixes go here -->
+* Fix race condition in `Node.List()` where concurrent calls shared a static
+  callback buffer; all FFI callbacks now use a per-call `GCHandle`-pinned
+  context. Also removes the `_nativeCallback` instance field in `WaitSet`,
+  which had a similar cross-call overwrite issue. Fixes
+  `IOX2_SERVICE_ID_LENGTH` (32 → 64) to match the cbindgen-generated C header.
+  [#12](https://github.com/eclipse-iceoryx/iceoryx2-csharp/issues/12)
 
 ### Refactoring
 
