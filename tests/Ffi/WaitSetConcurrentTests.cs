@@ -61,7 +61,7 @@ public class WaitSetConcurrentTests
     }
 
     [Fact]
-    public async Task WaitSet_TrampolineReturnsStop_WhenCallbackThrows()
+    public void WaitSet_TrampolineReturnsStop_WhenCallbackThrows()
     {
         var serviceName = $"test_waitset_throw_{Guid.NewGuid():N}";
         using var node = NodeBuilder.New().Name("wsc_throw_node").Create().Expect("node");
@@ -79,6 +79,5 @@ public class WaitSetConcurrentTests
         // WaitAndProcessOnce should still return Ok — the trampoline swallowed
         // the exception and returned STOP, and the native call succeeded.
         Assert.True(result.IsOk, "WaitAndProcessOnce must not propagate user exceptions across FFI.");
-        await Task.CompletedTask;
     }
 }
