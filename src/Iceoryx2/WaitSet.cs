@@ -29,9 +29,6 @@ public sealed class WaitSet : IDisposable
     private SafeWaitSetHandle _handle;
     private bool _disposed;
 
-    // Keep callback delegate alive to prevent GC collection
-    private Native.Iox2NativeMethods.iox2_waitset_run_callback? _nativeCallback;
-
     private static readonly Native.Iox2NativeMethods.iox2_waitset_run_callback s_singleCallbackTrampoline =
         (attachmentIdHandle, contextPtr) =>
         {
@@ -42,6 +39,34 @@ public sealed class WaitSet : IDisposable
             {
                 using var attachmentId = new WaitSetAttachmentId(new SafeWaitSetAttachmentIdHandle(attachmentIdHandle));
                 return (Native.Iox2NativeMethods.iox2_callback_progression_e)callback(attachmentId);
+            }
+            catch
+            {
+                return Native.Iox2NativeMethods.iox2_callback_progression_e.STOP;
+            }
+        };
+
+    private sealed record WaitSetRunContext(
+        Func<WaitSetAttachmentId, CallbackProgression> Callback,
+        bool DisposeAttachments);
+
+    private static readonly Native.Iox2NativeMethods.iox2_waitset_run_callback s_runCallbackTrampoline =
+        (attachmentIdHandle, contextPtr) =>
+        {
+            var ctx = Native.CallbackContext.Peek<WaitSetRunContext>(contextPtr);
+            if (ctx is null)
+                return Native.Iox2NativeMethods.iox2_callback_progression_e.STOP;
+            try
+            {
+                var attachmentId = new WaitSetAttachmentId(new SafeWaitSetAttachmentIdHandle(attachmentIdHandle));
+                if (ctx.DisposeAttachments)
+                {
+                    using (attachmentId)
+                    {
+                        return (Native.Iox2NativeMethods.iox2_callback_progression_e)ctx.Callback(attachmentId);
+                    }
+                }
+                return (Native.Iox2NativeMethods.iox2_callback_progression_e)ctx.Callback(attachmentId);
             }
             catch
             {
@@ -480,48 +505,28 @@ public sealed class WaitSet : IDisposable
             throw new ArgumentNullException(nameof(callback));
 
         var waitsetHandle = _handle.DangerousGetHandle();
+        var context = new WaitSetRunContext(callback, disposeAttachments);
+        var contextPtr = Native.CallbackContext.Pin(context);
 
-        // Create native callback wrapper
-        _nativeCallback = (attachmentIdHandle, contextPtr) =>
+        try
         {
-            try
+            var result = Native.Iox2NativeMethods.iox2_waitset_wait_and_process(
+                ref waitsetHandle,
+                s_runCallbackTrampoline,
+                contextPtr,
+                out var runResult);
+
+            if (result != Native.Iox2NativeMethods.IOX2_OK)
             {
-                var attachmentId = new WaitSetAttachmentId(new SafeWaitSetAttachmentIdHandle(attachmentIdHandle));
-
-                if (disposeAttachments)
-                {
-                    using (attachmentId)
-                    {
-                        var progression = callback(attachmentId);
-                        return (Native.Iox2NativeMethods.iox2_callback_progression_e)progression;
-                    }
-                }
-                else
-                {
-                    // Don't dispose - caller owns the lifetime
-                    var progression = callback(attachmentId);
-                    return (Native.Iox2NativeMethods.iox2_callback_progression_e)progression;
-                }
+                return Result<WaitSetRunResult, Iox2Error>.Err(Iox2Error.WaitSetRunFailed);
             }
-            catch
-            {
-                // On exception, stop processing
-                return Native.Iox2NativeMethods.iox2_callback_progression_e.STOP;
-            }
-        };
 
-        var result = Native.Iox2NativeMethods.iox2_waitset_wait_and_process(
-            ref waitsetHandle,
-            _nativeCallback,
-            IntPtr.Zero,
-            out var runResult);
-
-        if (result != Native.Iox2NativeMethods.IOX2_OK)
-        {
-            return Result<WaitSetRunResult, Iox2Error>.Err(Iox2Error.WaitSetRunFailed);
+            return Result<WaitSetRunResult, Iox2Error>.Ok((WaitSetRunResult)runResult);
         }
-
-        return Result<WaitSetRunResult, Iox2Error>.Ok((WaitSetRunResult)runResult);
+        finally
+        {
+            Native.CallbackContext.Unpin<WaitSetRunContext>(contextPtr);
+        }
     }
 
     /// <summary>
@@ -543,7 +548,6 @@ public sealed class WaitSet : IDisposable
         if (!_disposed)
         {
             _handle?.Dispose();
-            _nativeCallback = null; // Allow GC to collect callback
             _disposed = true;
         }
     }
