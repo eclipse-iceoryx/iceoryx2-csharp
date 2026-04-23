@@ -288,36 +288,29 @@ public sealed class WaitSet : IDisposable
         var waitsetHandle = _handle.DangerousGetHandle();
         var seconds = (ulong)timeout.TotalSeconds;
         var nanoseconds = (uint)((timeout.TotalSeconds - seconds) * 1_000_000_000);
+        var contextPtr = Native.CallbackContext.Pin(callback);
 
-        // Create native callback wrapper
-        _nativeCallback = (attachmentIdHandle, contextPtr) =>
+        try
         {
-            try
-            {
-                using var attachmentId = new WaitSetAttachmentId(new SafeWaitSetAttachmentIdHandle(attachmentIdHandle));
-                var progression = callback(attachmentId);
-                return (Native.Iox2NativeMethods.iox2_callback_progression_e)progression;
-            }
-            catch
-            {
-                return Native.Iox2NativeMethods.iox2_callback_progression_e.STOP;
-            }
-        };
+            var result = Native.Iox2NativeMethods.iox2_waitset_wait_and_process_once_with_timeout(
+                ref waitsetHandle,
+                s_singleCallbackTrampoline,
+                contextPtr,
+                seconds,
+                nanoseconds,
+                out var runResult);
 
-        var result = Native.Iox2NativeMethods.iox2_waitset_wait_and_process_once_with_timeout(
-            ref waitsetHandle,
-            _nativeCallback,
-            IntPtr.Zero,
-            seconds,
-            nanoseconds,
-            out var runResult);
+            if (result != Native.Iox2NativeMethods.IOX2_OK)
+            {
+                return Result<WaitSetRunResult, Iox2Error>.Err(Iox2Error.WaitSetRunFailed);
+            }
 
-        if (result != Native.Iox2NativeMethods.IOX2_OK)
-        {
-            return Result<WaitSetRunResult, Iox2Error>.Err(Iox2Error.WaitSetRunFailed);
+            return Result<WaitSetRunResult, Iox2Error>.Ok((WaitSetRunResult)runResult);
         }
-
-        return Result<WaitSetRunResult, Iox2Error>.Ok((WaitSetRunResult)runResult);
+        finally
+        {
+            Native.CallbackContext.Unpin<Func<WaitSetAttachmentId, CallbackProgression>>(contextPtr);
+        }
     }
 
     /// <summary>
