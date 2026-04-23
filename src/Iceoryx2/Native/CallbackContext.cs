@@ -61,6 +61,11 @@ internal static class CallbackContext
     /// Frees the <see cref="GCHandle"/> and returns the (now unrooted) state.
     /// MUST be called exactly once per <see cref="Pin{T}"/>, in a <c>finally</c>.
     /// </summary>
+    /// <remarks>
+    /// The returned value is provided to enable round-trip testing of the
+    /// pin/unpin contract. Production callers typically discard it because the
+    /// state object is already rooted on the calling stack frame.
+    /// </remarks>
     public static T? Unpin<T>(IntPtr token) where T : class
     {
         if (token == IntPtr.Zero)
