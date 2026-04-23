@@ -68,7 +68,7 @@ internal static partial class Iox2NativeMethods
     internal const int IOX2_OK = 0;
     internal const int IOX2_NODE_NAME_LENGTH = 128;
     internal const int IOX2_SERVICE_NAME_LENGTH = 255;
-    internal const int IOX2_SERVICE_ID_LENGTH = 32;
+    internal const int IOX2_SERVICE_ID_LENGTH = 64;
 
     // ========================================
     // Enums
