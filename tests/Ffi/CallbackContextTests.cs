@@ -10,10 +10,10 @@
 //
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+using Iceoryx2.Native;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using Iceoryx2.Native;
 using Xunit;
 
 namespace Iceoryx2.Tests.Ffi;
