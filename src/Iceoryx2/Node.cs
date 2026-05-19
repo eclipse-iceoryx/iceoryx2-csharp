@@ -87,8 +87,14 @@ public sealed class Node : IDisposable
             list.Add(new ServiceStaticConfig(id, name, messagingPattern));
             return Iox2NativeMethods.iox2_callback_progression_e.CONTINUE;
         }
-        catch
+        catch (Exception ex)
         {
+            // Internal marshalling code — surface diagnostics on stderr so
+            // failures here are debuggable. Distinct from the WaitSet
+            // trampolines, which intentionally swallow user-callback
+            // exceptions at the FFI boundary.
+            Console.Error.WriteLine($"Error in service list callback: {ex.Message}");
+            Console.Error.WriteLine($"Stack trace: {ex.StackTrace}");
             return Iox2NativeMethods.iox2_callback_progression_e.STOP;
         }
     }
