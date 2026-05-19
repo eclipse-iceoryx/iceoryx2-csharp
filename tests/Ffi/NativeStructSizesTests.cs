@@ -27,6 +27,12 @@ namespace Iceoryx2.Tests.Ffi;
 /// </summary>
 public class NativeStructSizesTests
 {
+    // INTENTIONAL DUPLICATION of the Size attribute in Iox2NativeMethods.cs.
+    // Sharing a single const between the StructLayout Size and the test would
+    // make the assert trivially pass (both sides derive from the same value)
+    // and erase the tripwire. The point of the duplication is double-entry
+    // bookkeeping against the C header: if a maintainer updates one side but
+    // forgets the other, this test fails.
     private const int ServiceBuilderStorageSize = 9104;   // iceoryx2.h iox2_service_builder_storage_t
     private const int NodeBuilderStorageSize = 18696;     // iceoryx2.h iox2_node_builder_storage_t
 
