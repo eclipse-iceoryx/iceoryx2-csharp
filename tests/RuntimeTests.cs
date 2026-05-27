@@ -11,6 +11,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 using Iceoryx2.Native;
+using Iceoryx2.Tests.Ffi;
 using System;
 using Xunit;
 
@@ -62,8 +63,7 @@ namespace Iceoryx2.Tests
                 Iox2NativeMethods.iox2_service_type_e.IPC,
                 out IntPtr nodeHandle);
 
-            // Check result - IOX2_OK = 0
-            Assert.Equal(Iox2NativeMethods.IOX2_OK, result);
+            FfiAssert.Ok(result, "iox2_node_builder_create");
             Assert.NotEqual(IntPtr.Zero, nodeHandle);
 
             // Clean up
@@ -86,7 +86,7 @@ namespace Iceoryx2.Tests
                 Iox2NativeMethods.iox2_service_type_e.IPC,
                 out IntPtr nodeHandle);
 
-            Assert.Equal(Iox2NativeMethods.IOX2_OK, result);
+            FfiAssert.Ok(result, "iox2_node_builder_create");
             Assert.NotEqual(IntPtr.Zero, nodeHandle);
 
             // Now try to get a service builder from the node
