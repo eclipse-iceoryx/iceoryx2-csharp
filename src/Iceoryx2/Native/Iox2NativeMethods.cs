@@ -68,7 +68,7 @@ internal static partial class Iox2NativeMethods
     internal const int IOX2_OK = 0;
     internal const int IOX2_NODE_NAME_LENGTH = 128;
     internal const int IOX2_SERVICE_NAME_LENGTH = 255;
-    internal const int IOX2_SERVICE_ID_LENGTH = 64;
+    internal const int IOX2_SERVICE_HASH_LENGTH = 64;
 
     // ========================================
     // Enums
@@ -191,7 +191,7 @@ internal static partial class Iox2NativeMethods
     }
 
     // Publisher Builder Storage
-    [StructLayout(LayoutKind.Sequential, Size = 128, Pack = 16)]
+    [StructLayout(LayoutKind.Sequential, Size = 208, Pack = 16)]
     internal struct iox2_port_factory_publisher_builder_storage_t { }
 
     [StructLayout(LayoutKind.Sequential, Pack = 16)]
@@ -342,10 +342,10 @@ internal static partial class Iox2NativeMethods
     }
 
     // Client Builder Storage
-    [StructLayout(LayoutKind.Sequential, Size = 24, Pack = 8)]
+    [StructLayout(LayoutKind.Sequential, Size = 256, Pack = 16)]
     internal struct iox2_port_factory_client_builder_storage_t { }
 
-    [StructLayout(LayoutKind.Sequential, Pack = 8)]
+    [StructLayout(LayoutKind.Sequential, Pack = 16)]
     internal struct iox2_port_factory_client_builder_t
     {
         public iox2_service_type_e service_type;
@@ -354,10 +354,10 @@ internal static partial class Iox2NativeMethods
     }
 
     // Server Builder Storage
-    [StructLayout(LayoutKind.Sequential, Size = 24, Pack = 8)]
+    [StructLayout(LayoutKind.Sequential, Size = 256, Pack = 16)]
     internal struct iox2_port_factory_server_builder_storage_t { }
 
-    [StructLayout(LayoutKind.Sequential, Pack = 8)]
+    [StructLayout(LayoutKind.Sequential, Pack = 16)]
     internal struct iox2_port_factory_server_builder_t
     {
         public iox2_service_type_e service_type;
@@ -378,7 +378,7 @@ internal static partial class Iox2NativeMethods
     }
 
     // Server Storage
-    [StructLayout(LayoutKind.Sequential, Size = 1248, Pack = 16)]
+    [StructLayout(LayoutKind.Sequential, Size = 248, Pack = 16)]
     internal struct iox2_server_storage_t { }
 
     [StructLayout(LayoutKind.Sequential, Pack = 16)]
@@ -390,7 +390,7 @@ internal static partial class Iox2NativeMethods
     }
 
     // Request Mut Storage
-    [StructLayout(LayoutKind.Sequential, Size = 64, Pack = 8)]
+    [StructLayout(LayoutKind.Sequential, Size = 80, Pack = 8)]
     internal struct iox2_request_mut_storage_t { }
 
     [StructLayout(LayoutKind.Sequential, Pack = 8)]
@@ -401,20 +401,21 @@ internal static partial class Iox2NativeMethods
         public IntPtr deleter;
     }
 
-    // Request Storage
-    [StructLayout(LayoutKind.Sequential, Size = 96, Pack = 16)]
-    internal struct iox2_request_storage_t { }
+    // Active Request Storage (server-side handle to an incoming request).
+    // Maps to v0.9.1's `iox2_active_request_storage_t` / `iox2_active_request_t`.
+    [StructLayout(LayoutKind.Sequential, Size = 128, Pack = 16)]
+    internal struct iox2_active_request_storage_t { }
 
     [StructLayout(LayoutKind.Sequential, Pack = 16)]
-    internal struct iox2_request_t
+    internal struct iox2_active_request_t
     {
         public iox2_service_type_e service_type;
-        public iox2_request_storage_t value;
+        public iox2_active_request_storage_t value;
         public IntPtr deleter;
     }
 
     // Response Mut Storage
-    [StructLayout(LayoutKind.Sequential, Size = 64, Pack = 8)]
+    [StructLayout(LayoutKind.Sequential, Size = 88, Pack = 8)]
     internal struct iox2_response_mut_storage_t { }
 
     [StructLayout(LayoutKind.Sequential, Pack = 8)]
@@ -438,7 +439,7 @@ internal static partial class Iox2NativeMethods
     }
 
     // Pending Response Storage
-    [StructLayout(LayoutKind.Sequential, Size = 32, Pack = 8)]
+    [StructLayout(LayoutKind.Sequential, Size = 88, Pack = 8)]
     internal struct iox2_pending_response_storage_t { }
 
     [StructLayout(LayoutKind.Sequential, Pack = 8)]
@@ -593,7 +594,7 @@ internal static partial class Iox2NativeMethods
     [StructLayout(LayoutKind.Sequential)]
     internal struct iox2_static_config_t
     {
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = IOX2_SERVICE_ID_LENGTH)]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = IOX2_SERVICE_HASH_LENGTH)]
         public byte[] id;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = IOX2_SERVICE_NAME_LENGTH)]
         public byte[] name;
@@ -1204,7 +1205,7 @@ internal static partial class Iox2NativeMethods
     internal static extern void iox2_log(iox2_log_level_e log_level, IntPtr origin, IntPtr message);
 
     // Note: iox2_use_console_logger() was removed in iceoryx2 v0.8.0 - console logger is now the default
-    // Note: iox2_use_file_logger() was removed in iceoryx2 v0.8.0 - requires rebuild with --features iceoryx2-loggers/file
+    // Note: iox2_use_file_logger() was removed in iceoryx2 v0.8.0 - requires rebuild with --features iceoryx2-bb-loggers/file (the crate was renamed from iceoryx2-loggers in v0.9.0)
 
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
     internal static extern void iox2_set_log_level_from_env_or_default();

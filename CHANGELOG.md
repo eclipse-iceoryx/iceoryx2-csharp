@@ -13,6 +13,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [#14](https://github.com/eclipse-iceoryx/iceoryx2-csharp/issues/14)
 * Add Eclipse Dash license check script and DEPENDENCIES file for NuGet dependency compliance
   [#17](https://github.com/eclipse-iceoryx/iceoryx2-csharp/issues/17)
+* Update bundled iceoryx2 native library from v0.8.1 to v0.9.1, picking up
+  upstream bugfixes for concurrent node creation, docker-container alive
+  detection, write-only shared memory cleanup, and `cleanup_dead_nodes_on_open`
+  with `send_dead_node_signal`; plus the new `AdaptiveWaitBehavior`
+  [#22](https://github.com/eclipse-iceoryx/iceoryx2-csharp/issues/22)
+* Expand `NativeStructSizesTests` from 2 to 27 storage-struct tripwires so
+  the next FFI bump fails loud on size drift across the full P/Invoke
+  surface
+  [#22](https://github.com/eclipse-iceoryx/iceoryx2-csharp/issues/22)
 
 ### Bugfixes
 
@@ -29,7 +38,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Refactoring
 
-<!-- Code refactoring, internal improvements go here -->
+* Rename `IOX2_SERVICE_ID_LENGTH` to `IOX2_SERVICE_HASH_LENGTH` to track
+  upstream's v0.9.0 rename of `ServiceId` → `ServiceHash` (value unchanged
+  at 64). Internal-only constant, no public C# API impact
+  [#22](https://github.com/eclipse-iceoryx/iceoryx2-csharp/issues/22)
+* Rename internal `iox2_request_storage_t` / `iox2_request_t` to
+  `iox2_active_request_storage_t` / `iox2_active_request_t` to match
+  upstream's v0.9.0 type naming. Internal-only, no public C# API impact
+  [#22](https://github.com/eclipse-iceoryx/iceoryx2-csharp/issues/22)
 
 ### API Breaking Changes
 
