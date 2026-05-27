@@ -65,6 +65,57 @@ public class CallbackContextTests
     }
 
     [Fact]
+    public void Pin_Throws_On_Null_State()
+    {
+        Assert.Throws<ArgumentNullException>(() => CallbackContext.Pin<List<int>>(null!));
+    }
+
+    [Fact]
+    public void Peek_With_Wrong_Type_Returns_Null()
+    {
+        var state = new List<int> { 1 };
+        IntPtr token = CallbackContext.Pin(state);
+        try
+        {
+            var miscast = CallbackContext.Peek<string>(token);
+            Assert.Null(miscast);
+            // Original pin is still intact for the correct type.
+            Assert.Same(state, CallbackContext.Peek<List<int>>(token));
+        }
+        finally
+        {
+            CallbackContext.Unpin<List<int>>(token);
+        }
+    }
+
+    [Fact]
+    public void Unpin_With_Wrong_Type_Still_Frees_Handle()
+    {
+        // If a caller mis-specifies T (e.g., evolving binding code), Unpin
+        // must still Free the GCHandle to prevent a leak; only the return
+        // value is null.
+        WeakReference weak = PinAndUnpinWithWrongType();
+
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+
+        Assert.False(weak.IsAlive,
+            "Unpin must Free the GCHandle even on type mismatch.");
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static WeakReference PinAndUnpinWithWrongType()
+    {
+        var state = new List<int>();
+        var weak = new WeakReference(state);
+        var token = CallbackContext.Pin(state);
+        var bogus = CallbackContext.Unpin<string>(token);
+        Assert.Null(bogus);
+        return weak;
+    }
+
+    [Fact]
     public void Pin_Unpin_Repeated_Does_Not_Leak_GCHandles()
     {
         // Pin-then-Unpin one list in a non-inlined helper so the JIT cannot

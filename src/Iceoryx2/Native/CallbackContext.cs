@@ -20,7 +20,7 @@ namespace Iceoryx2.Native;
 /// <see cref="IntPtr"/> context and recovered inside a native callback.
 /// </summary>
 /// <remarks>
-/// Usage:
+/// <para>Usage:</para>
 /// <code>
 /// var ctx = CallbackContext.Pin(state);
 /// try { NativeCall(..., Trampoline, ctx); }
@@ -29,7 +29,19 @@ namespace Iceoryx2.Native;
 /// // Inside the static trampoline:
 /// var state = CallbackContext.Peek&lt;TState&gt;(contextPtr);
 /// </code>
-/// Every <see cref="Pin{T}"/> MUST be matched by exactly one <see cref="Unpin{T}"/>.
+/// <para>
+/// <b>Safety contract.</b> The returned <see cref="IntPtr"/> is a raw handle into
+/// the runtime's GC handle table; treat it like a C pointer to manually managed
+/// storage. Every <see cref="Pin{T}"/> MUST be matched by exactly one
+/// <see cref="Unpin{T}"/>, ideally in a <c>try</c>/<c>finally</c> wrapping the
+/// native call. After <see cref="Unpin{T}"/> the token MUST NOT be used again
+/// (no further <see cref="Peek{T}"/>, no second <see cref="Unpin{T}"/>): the
+/// runtime recycles handle slots aggressively, so a re-used token can silently
+/// resolve to an unrelated pin and double-free it — the .NET analogue of a C
+/// use-after-free / double-free. The <c>IsAllocated</c> preliminary check
+/// inside <see cref="Unpin{T}"/> defends against <see cref="IntPtr.Zero"/> only;
+/// it cannot detect a recycled slot.
+/// </para>
 /// </remarks>
 internal static class CallbackContext
 {
@@ -62,9 +74,16 @@ internal static class CallbackContext
     /// MUST be called exactly once per <see cref="Pin{T}"/>, in a <c>finally</c>.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// The returned value is provided to enable round-trip testing of the
     /// pin/unpin contract. Production callers typically discard it because the
     /// state object is already rooted on the calling stack frame.
+    /// </para>
+    /// <para>
+    /// If <typeparamref name="T"/> does not match the pinned state's actual
+    /// type, the underlying <see cref="GCHandle"/> is still freed (no leak) and
+    /// <c>null</c> is returned.
+    /// </para>
     /// </remarks>
     public static T? Unpin<T>(IntPtr token) where T : class
     {
